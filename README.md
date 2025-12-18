@@ -227,8 +227,6 @@ For models like `claude-opus-4-5-thinking`:
 - **Thinking Budget Safety:** If a thinking budget is enabled, the plugin ensures output token limits are high enough to avoid budget-related errors.
 - **Tool Use:** Tool calls and responses are assigned proper IDs, and tool calling is set to validated mode for better Claude compatibility.
 
-> **Limit:** Once the final text response starts streaming, you won't see new thinking blocks for that turn, even if the model generates them internally.
-
 **Troubleshooting:** If you see signature errors in multi-turn tool loops, restart `opencode` to reset the plugin session/signature cache.
 
 ## Debugging

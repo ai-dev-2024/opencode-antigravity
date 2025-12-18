@@ -8,12 +8,17 @@ export interface OAuthAuthDetails {
   expires?: number;
 }
 
+export interface ApiKeyAuthDetails {
+  type: "api_key";
+  key: string;
+}
+
 export interface NonOAuthAuthDetails {
   type: string;
   [key: string]: unknown;
 }
 
-export type AuthDetails = OAuthAuthDetails | NonOAuthAuthDetails;
+export type AuthDetails = OAuthAuthDetails | ApiKeyAuthDetails | NonOAuthAuthDetails;
 
 export type GetAuth = () => Promise<AuthDetails>;
 

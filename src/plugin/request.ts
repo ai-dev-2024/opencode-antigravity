@@ -25,7 +25,10 @@ import {
  * This is used for caching thinking signatures across multi-turn conversations.
  * Generated once at plugin load time and reused for all requests.
  */
-const PLUGIN_SESSION_ID = `-${Math.floor(Math.random() * 9_000_000_000_000_000_000)}`;
+const PLUGIN_SESSION_ID = `-${crypto.randomUUID()}`;
+
+// Claude thinking models need a sufficiently large max output token limit when thinking is enabled.
+const CLAUDE_THINKING_MAX_OUTPUT_TOKENS = 64_000;
 
 /**
  * Gets the stable session ID for this plugin instance.
@@ -358,7 +361,7 @@ export function prepareAntigravityRequest(
             if (isClaudeThinkingModel && typeof thinkingBudget === "number" && thinkingBudget > 0) {
               const currentMax = (rawGenerationConfig.maxOutputTokens ?? rawGenerationConfig.max_output_tokens) as number | undefined;
               if (!currentMax || currentMax <= thinkingBudget) {
-                rawGenerationConfig.maxOutputTokens = 64000;
+                rawGenerationConfig.maxOutputTokens = CLAUDE_THINKING_MAX_OUTPUT_TOKENS;
                 if (rawGenerationConfig.max_output_tokens !== undefined) {
                   delete rawGenerationConfig.max_output_tokens;
                 }
@@ -370,7 +373,7 @@ export function prepareAntigravityRequest(
             const generationConfig: Record<string, unknown> = { thinkingConfig };
 
             if (isClaudeThinkingModel && typeof thinkingBudget === "number" && thinkingBudget > 0) {
-              generationConfig.maxOutputTokens = 64000;
+              generationConfig.maxOutputTokens = CLAUDE_THINKING_MAX_OUTPUT_TOKENS;
             }
 
             requestPayload.generationConfig = generationConfig;

@@ -5,6 +5,7 @@ import {
   extractThinkingConfig,
   resolveThinkingConfig,
   filterUnsignedThinkingBlocks,
+  filterMessagesThinkingBlocks,
   transformThinkingParts,
   normalizeThinkingConfig,
   parseAntigravityApiBody,
@@ -13,6 +14,144 @@ import {
   rewriteAntigravityPreviewAccessError,
   DEFAULT_THINKING_BUDGET,
 } from "./request-helpers";
+
+describe("sanitizeThinkingPart (covered via filtering)", () => {
+  it("extracts wrapped text and strips SDK fields for Gemini-style thought blocks", () => {
+    const validSignature = "s".repeat(60);
+
+    const contents = [
+      {
+        role: "model",
+        parts: [
+          {
+            thought: true,
+            text: {
+              text: "wrapped thought",
+              cache_control: { type: "ephemeral" },
+              providerOptions: { injected: true },
+            },
+            thoughtSignature: validSignature,
+            cache_control: { type: "ephemeral" },
+            providerOptions: { injected: true },
+          },
+        ],
+      },
+    ];
+
+    const result = filterUnsignedThinkingBlocks(contents) as any;
+    expect(result[0].parts).toHaveLength(1);
+    expect(result[0].parts[0]).toEqual({
+      thought: true,
+      text: "wrapped thought",
+      thoughtSignature: validSignature,
+    });
+
+    // Ensure injected fields are removed
+    expect(result[0].parts[0].cache_control).toBeUndefined();
+    expect(result[0].parts[0].providerOptions).toBeUndefined();
+  });
+
+  it("extracts wrapped thinking text and strips SDK fields for Anthropic-style thinking blocks", () => {
+    const validSignature = "a".repeat(60);
+
+    const contents = [
+      {
+        role: "model",
+        parts: [
+          {
+            type: "thinking",
+            thinking: {
+              text: "wrapped thinking",
+              cache_control: { type: "ephemeral" },
+              providerOptions: { injected: true },
+            },
+            signature: validSignature,
+            cache_control: { type: "ephemeral" },
+            providerOptions: { injected: true },
+          },
+        ],
+      },
+    ];
+
+    const result = filterUnsignedThinkingBlocks(contents) as any;
+    expect(result[0].parts).toHaveLength(1);
+    expect(result[0].parts[0]).toEqual({
+      type: "thinking",
+      thinking: "wrapped thinking",
+      signature: validSignature,
+    });
+  });
+
+  it("preserves signatures while dropping cache_control/providerOptions during signature restoration", () => {
+    const cachedSignature = "c".repeat(60);
+    const getCachedSignatureFn = (_sessionId: string, _text: string) => cachedSignature;
+
+    const messages = [
+      {
+        role: "assistant",
+        content: [
+          {
+            type: "thinking",
+            thinking: {
+              thinking: "restore me",
+              cache_control: { type: "ephemeral" },
+            },
+            // no signature present (forces restore)
+            providerOptions: { injected: true },
+          },
+          { type: "text", text: "visible" },
+        ],
+      },
+    ];
+
+    const result = filterMessagesThinkingBlocks(messages, "session-1", getCachedSignatureFn) as any;
+    expect(result[0].content[0]).toEqual({
+      type: "thinking",
+      thinking: "restore me",
+      signature: cachedSignature,
+    });
+  });
+
+  it("falls back to recursive stripping for signed reasoning blocks and removes nested SDK fields", () => {
+    const validSignature = "z".repeat(60);
+
+    const contents = [
+      {
+        role: "model",
+        parts: [
+          {
+            type: "reasoning",
+            signature: validSignature,
+            cache_control: { type: "ephemeral" },
+            providerOptions: { injected: true },
+            meta: {
+              keep: true,
+              cache_control: { nested: true },
+              arr: [
+                { providerOptions: { nested: true }, keep: 1 },
+                { cache_control: { nested: true }, keep: 2 },
+              ],
+            },
+          },
+          { type: "text", text: "visible" },
+        ],
+      },
+    ];
+
+    const result = filterUnsignedThinkingBlocks(contents) as any;
+    expect(result[0].parts[0]).toEqual({
+      type: "reasoning",
+      signature: validSignature,
+      meta: {
+        keep: true,
+        arr: [
+          { keep: 1 },
+          { keep: 2 },
+        ],
+      },
+    });
+  });
+});
 
 describe("isThinkingCapableModel", () => {
   it("returns true for models with 'thinking' in name", () => {
@@ -260,6 +399,134 @@ describe("filterUnsignedThinkingBlocks", () => {
     const contents = [{ role: "model" }];
     const result = filterUnsignedThinkingBlocks(contents);
     expect(result).toEqual(contents);
+  });
+});
+
+describe("filterMessagesThinkingBlocks", () => {
+  it("filters out unsigned thinking blocks in messages[].content", () => {
+    const messages = [
+      {
+        role: "assistant",
+        content: [
+          { type: "thinking", thinking: "no signature" },
+          { type: "text", text: "visible" },
+        ],
+      },
+    ];
+
+    const result = filterMessagesThinkingBlocks(messages) as any;
+    expect(result[0].content).toHaveLength(1);
+    expect(result[0].content[0].type).toBe("text");
+  });
+
+  it("keeps signed thinking blocks with valid signatures and sanitizes injected fields", () => {
+    const validSignature = "a".repeat(60);
+    const messages = [
+      {
+        role: "assistant",
+        content: [
+          {
+            type: "thinking",
+            thinking: { text: "wrapped", cache_control: { type: "ephemeral" } },
+            signature: validSignature,
+            cache_control: { type: "ephemeral" },
+            providerOptions: { injected: true },
+          },
+          { type: "text", text: "visible" },
+        ],
+      },
+    ];
+
+    const result = filterMessagesThinkingBlocks(messages) as any;
+    expect(result[0].content[0]).toEqual({
+      type: "thinking",
+      thinking: "wrapped",
+      signature: validSignature,
+    });
+  });
+
+  it("filters thinking blocks with short signatures", () => {
+    const messages = [
+      {
+        role: "assistant",
+        content: [
+          { type: "thinking", thinking: "short sig", signature: "sig123" },
+          { type: "text", text: "visible" },
+        ],
+      },
+    ];
+
+    const result = filterMessagesThinkingBlocks(messages) as any;
+    expect(result[0].content).toEqual([{ type: "text", text: "visible" }]);
+  });
+
+  it("restores a missing signature from cache and preserves it after sanitization", () => {
+    const cachedSignature = "c".repeat(60);
+    const getCachedSignatureFn = (_sessionId: string, _text: string) => cachedSignature;
+
+    const messages = [
+      {
+        role: "assistant",
+        content: [
+          {
+            type: "thinking",
+            thinking: { thinking: "restore me", providerOptions: { injected: true } },
+            // no signature present (forces restore)
+            cache_control: { type: "ephemeral" },
+          },
+          { type: "text", text: "visible" },
+        ],
+      },
+    ];
+
+    const result = filterMessagesThinkingBlocks(messages, "session-1", getCachedSignatureFn) as any;
+    expect(result[0].content[0]).toEqual({
+      type: "thinking",
+      thinking: "restore me",
+      signature: cachedSignature,
+    });
+  });
+
+  it("handles Gemini-style thought blocks inside messages content", () => {
+    const validSignature = "b".repeat(60);
+    const messages = [
+      {
+        role: "assistant",
+        content: [
+          {
+            thought: true,
+            text: { text: "wrapped thought", cache_control: { type: "ephemeral" } },
+            thoughtSignature: validSignature,
+            providerOptions: { injected: true },
+          },
+          { type: "text", text: "visible" },
+        ],
+      },
+    ];
+
+    const result = filterMessagesThinkingBlocks(messages) as any;
+    expect(result[0].content[0]).toEqual({
+      thought: true,
+      text: "wrapped thought",
+      thoughtSignature: validSignature,
+    });
+  });
+
+  it("preserves non-thinking blocks and returns message unchanged when content is missing", () => {
+    const messages: any[] = [
+      { role: "assistant", content: [{ type: "text", text: "hello" }] },
+      { role: "assistant" },
+    ];
+
+    const result = filterMessagesThinkingBlocks(messages) as any;
+    expect(result[0]).toEqual(messages[0]);
+    expect(result[1]).toEqual(messages[1]);
+  });
+
+  it("handles non-object messages gracefully", () => {
+    const messages: any[] = [null, "string", 123, { role: "assistant", content: [] }];
+    const result = filterMessagesThinkingBlocks(messages) as any;
+    expect(result).toEqual(messages);
   });
 });
 

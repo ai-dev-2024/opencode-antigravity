@@ -1,5 +1,6 @@
 import { accessTokenExpired } from "./auth";
 import type { OAuthAuthDetails } from "./types";
+import { createHash } from "node:crypto";
 
 const authCache = new Map<string, OAuthAuthDetails>();
 
@@ -82,17 +83,16 @@ const SIGNATURE_CACHE_TTL_MS = 60 * 60 * 1000;
 // Maximum entries per session to prevent memory bloat
 const MAX_ENTRIES_PER_SESSION = 100;
 
+// 16 hex chars = 64-bit key space; keeps memory bounded while making collisions extremely unlikely.
+const SIGNATURE_TEXT_HASH_HEX_LEN = 16;
+
 /**
- * Simple hash function for text content.
+ * Hashes text content into a stable, Unicode-safe key.
+ *
+ * Uses SHA-256 over UTF-8 bytes and truncates to keep memory usage bounded.
  */
 function hashText(text: string): string {
-  let hash = 0;
-  for (let i = 0; i < text.length; i++) {
-    const char = text.charCodeAt(i);
-    hash = ((hash << 5) - hash) + char;
-    hash = hash & hash; // Convert to 32bit integer
-  }
-  return hash.toString(36);
+  return createHash("sha256").update(text, "utf8").digest("hex").slice(0, SIGNATURE_TEXT_HASH_HEX_LEN);
 }
 
 /**
