@@ -54,6 +54,7 @@ import {
 import { sanitizeCrossModelPayloadInPlace } from "./transform/cross-model-sanitizer";
 import {
   resolveModelWithTier,
+  getPublicModelName,
   isClaudeModel,
   isClaudeThinkingModel,
   CLAUDE_THINKING_MAX_OUTPUT_TOKENS,
@@ -618,14 +619,20 @@ export function prepareAntigravityRequest(
 
   // Use model resolver for tier-based thinking configuration
   const resolved = resolveModelWithTier(rawModel);
-  const effectiveModel = resolved.actualModel;
+  const effectiveModel = headerStyle === "gemini-cli" 
+    ? getPublicModelName(resolved.actualModel)
+    : resolved.actualModel;
 
   const streaming = rawAction === STREAM_ACTION;
-  const defaultEndpoint = headerStyle === "gemini-cli" ? GEMINI_CLI_ENDPOINT : ANTIGRAVITY_ENDPOINT;
-  const baseEndpoint = endpointOverride ?? defaultEndpoint;
-  const transformedUrl = `${baseEndpoint}/v1internal:${rawAction}${streaming ? "?alt=sse" : ""}`;
-  const isClaude = isClaudeModel(effectiveModel);
-  const isClaudeThinking = isClaudeThinkingModel(effectiveModel);
+  const baseEndpoint = endpointOverride ?? ANTIGRAVITY_ENDPOINT;
+  
+  // Use public Gemini API format for gemini-cli fallback to avoid 404s
+  const transformedUrl = headerStyle === "gemini-cli"
+    ? `https://generativelanguage.googleapis.com/v1beta/models/${effectiveModel}:${rawAction}${streaming ? "?alt=sse" : ""}`
+    : `${baseEndpoint}/v1internal:${rawAction}${streaming ? "?alt=sse" : ""}`;
+    
+  const isClaude = isClaudeModel(resolved.actualModel);
+  const isClaudeThinking = isClaudeThinkingModel(resolved.actualModel);
   
   // Tier-based thinking configuration from model resolver
   const tierThinkingBudget = resolved.thinkingBudget;

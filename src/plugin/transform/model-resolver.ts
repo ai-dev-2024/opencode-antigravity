@@ -213,6 +213,23 @@ export function resolveModelWithTier(requestedModel: string): ResolvedModel {
 }
 
 /**
+ * Maps Antigravity-specific model names to their public Gemini equivalents.
+ * Used when falling back to gemini-cli header style.
+ */
+export function getPublicModelName(model: string): string {
+  const lower = model.toLowerCase();
+  
+  // Official gemini-cli aliases
+  if (lower.includes("gemini-3-pro")) return "gemini-3-pro-preview";
+  if (lower.includes("gemini-3-flash")) return "gemini-3-flash-preview";
+  if (lower.includes("gemini-2.5-pro")) return "gemini-2.5-pro";
+  if (lower.includes("gemini-2.5-flash")) return "gemini-2.5-flash";
+  
+  // Strip tier suffixes for public API
+  return model.replace(TIER_REGEX, "");
+}
+
+/**
  * Gets the model family for routing decisions.
  */
 export function getModelFamily(model: string): "claude" | "gemini-flash" | "gemini-pro" {

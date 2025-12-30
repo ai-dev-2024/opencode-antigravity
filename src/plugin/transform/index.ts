@@ -19,6 +19,7 @@ export type {
 // Model resolution
 export {
   resolveModelWithTier,
+  getPublicModelName,
   getModelFamily,
   MODEL_ALIASES,
   MODEL_FALLBACKS,
