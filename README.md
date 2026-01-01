@@ -1,37 +1,76 @@
-# opencode-antigravity-auth
+# Antigravity + Gemini CLI OAuth Plugin for Opencode
 
 [![npm version](https://img.shields.io/npm/v/opencode-antigravity-auth.svg)](https://www.npmjs.com/package/opencode-antigravity-auth)
 [![npm beta](https://img.shields.io/npm/v/opencode-antigravity-auth/beta.svg?label=beta)](https://www.npmjs.com/package/opencode-antigravity-auth)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-OpenCode plugin for Google Antigravity OAuth authentication.
+Enable Opencode to authenticate against **Antigravity** (Google's IDE) via OAuth so you can use Antigravity rate limits and access models like `gemini-3-pro-high` and `claude-opus-4-5-thinking` with your Google credentials.
 
-## Features
+## What you get
 
+- **Google OAuth sign-in** with automatic token refresh via `opencode auth login`
 - **Dual Quota System** - Access both Antigravity quota (Claude, Gemini 3) and Gemini CLI quota from a single plugin
 - **Multi-Account Rotation** - Add multiple Google accounts; automatically rotates when one is rate-limited
-- **Plugin Compatible** - Works alongside other OpenCode plugins (opencodesync, etc.)
+- **Real-time SSE streaming** including thinking blocks and incremental output
 - **Extended Thinking** - Native support for Claude thinking budgets and Gemini 3 thinking levels
 - **Auto Recovery** - Automatic session recovery from Claude tool_result_missing errors
+- **Plugin Compatible** - Works alongside other OpenCode plugins (opencodesync, etc.)
 
 ## Installation
 
-```bash
-npm install opencode-antigravity-auth
+### For Humans
+
+**Option A: Let an LLM do it**
+
+Paste this into any LLM agent (Claude Code, OpenCode, Cursor, etc.):
+
+```
+Install the opencode-antigravity-auth plugin and add the Antigravity model definitions to ~/.config/opencode/opencode.json by following: https://raw.githubusercontent.com/anthropics/opencode-antigravity-auth/dev/README.md
 ```
 
-Add to your OpenCode config (`~/.config/opencode/opencode.json`):
+**Option B: Manual setup**
 
-```json
-{
-  "plugin": ["opencode-antigravity-auth@beta"]
-}
-```
+1. **Add the plugin to your config** (`~/.config/opencode/opencode.json`):
 
-On first run, a browser window opens for Google OAuth. Tokens are stored securely and refresh automatically.
+   ```json
+   {
+     "plugin": ["opencode-antigravity-auth@beta"]
+   }
+   ```
+
+2. **Authenticate:**
+
+   ```bash
+   opencode auth login
+   ```
+
+3. **Add models** (see [Available Models](#available-models) for full list):
+
+   ```json
+   {
+     "plugin": ["opencode-antigravity-auth@beta"],
+     "provider": {
+       "google": {
+         "models": {
+           "antigravity-claude-sonnet-4-5": {
+             "name": "Claude Sonnet 4.5 (Antigravity)",
+             "limit": { "context": 200000, "output": 64000 },
+             "modalities": { "input": ["text", "image", "pdf"], "output": ["text"] }
+           }
+         }
+       }
+     }
+   }
+   ```
+
+4. **Use it:**
+
+   ```bash
+   opencode run "Hello" --model=google/antigravity-claude-sonnet-4-5
+   ```
 
 <details>
-<summary>Installation Guide for LLM Agents</summary>
+<summary><b>Installation Guide for LLM Agents</b></summary>
 
 ### Step-by-Step Instructions
 
@@ -45,60 +84,11 @@ On first run, a browser window opens for Google OAuth. Tokens are stored securel
 
 ### Complete Configuration Example
 
-Create `~/.config/opencode/antigravity.json`
-```jsonc
-{
-  // JSON Schema for IDE autocompletion
-  "$schema": "https://raw.githubusercontent.com/anthropics/opencode-antigravity-auth/main/assets/antigravity.schema.json",
-
-  // === General ===
-  "quiet_mode": false,           // Suppress toast notifications (except recovery)
-  "debug": false,                // Enable debug logging to file
-  "log_dir": "/custom/log/path", // Custom debug log directory (optional)
-  "auto_update": true,           // Auto-update plugin
-
-  // === Thinking Blocks ===
-  "keep_thinking": false,        // Preserve thinking blocks (may cause signature errors)
-
-  // === Session Recovery ===
-  "session_recovery": true,      // Auto-recover from tool_result_missing errors
-  "auto_resume": true,           // Auto-send "continue" after recovery
-  "resume_text": "continue",     // Custom resume prompt text
-
-  // === Empty Response Handling ===
-  "empty_response_max_attempts": 4,      // Max retries for empty responses
-  "empty_response_retry_delay_ms": 2000, // Delay between retries (ms)
-
-  // === Tool Handling ===
-  "tool_id_recovery": true,       // Fix mismatched tool IDs from context compaction
-  "claude_tool_hardening": true,  // Prevent Claude tool hallucinations
-
-  // === Token Refresh ===
-  "proactive_token_refresh": true,              // Background token refresh
-  "proactive_refresh_buffer_seconds": 1800,     // Refresh 30min before expiry
-  "proactive_refresh_check_interval_seconds": 300, // Check every 5min
-
-  // === Rate Limiting ===
-  "max_rate_limit_wait_seconds": 300, // Max wait time when rate limited (0=unlimited)
-  "quota_fallback": false,            // Try alternate quota when rate limited
-
-  // === Signature Cache (for keep_thinking=true) ===
-  "signature_cache": {
-    "enabled": true,
-    "memory_ttl_seconds": 3600,      // 1 hour in-memory
-    "disk_ttl_seconds": 172800,      // 48 hours on disk
-    "write_interval_seconds": 60     // Background write interval
-  }
-}
-```
-
-Create `~/.config/opencode/opencode.json`
-```jsonc
+Create `~/.config/opencode/opencode.json`:
+```json
 {
   "$schema": "https://opencode.ai/config.json",
-  "plugin": [
-    "opencode-antigravity-auth@beta"
-  ],
+  "plugin": ["opencode-antigravity-auth@beta"],
   "provider": {
     "google": {
       "models": {
@@ -151,16 +141,18 @@ Create `~/.config/opencode/opencode.json`
           "name": "Claude Opus 4.5 Think High (Antigravity)",
           "limit": { "context": 200000, "output": 64000 },
           "modalities": { "input": ["text", "image", "pdf"], "output": ["text"] }
-        }
+        },
       }
     }
   }
 }
 ```
 
-### Beta Versions
+### Verification
 
-For the latest development features, check the [dev branch README](https://github.com/anthropics/opencode-antigravity-auth/tree/dev) for beta installation instructions.
+```bash
+opencode run "Hello" --model=google/antigravity-claude-sonnet-4-5
+```
 
 </details>
 
@@ -196,14 +188,12 @@ Models without `antigravity-` prefix use Gemini CLI quota:
 | `google/gemini-3-pro-high` | Gemini 3 Pro with high thinking |
 
 <details>
-<summary>Full models configuration</summary>
+<summary><b>Full models configuration</b></summary>
 
-```jsonc
+```json
 {
   "$schema": "https://opencode.ai/config.json",
-  "plugin": [
-    "opencode-antigravity-auth@latest"
-  ],
+  "plugin": ["opencode-antigravity-auth@beta"],
   "provider": {
     "google": {
       "models": {
@@ -256,71 +246,9 @@ Models without `antigravity-` prefix use Gemini CLI quota:
           "name": "Claude Opus 4.5 Think High (Antigravity)",
           "limit": { "context": 200000, "output": 64000 },
           "modalities": { "input": ["text", "image", "pdf"], "output": ["text"] }
-        }
+        },
       }
     }
-  }
-}
-```
-</details>
-
-## Configuration
-
-
-### Environment Overrides
-
-```bash
-OPENCODE_ANTIGRAVITY_QUIET=1         # quiet_mode
-OPENCODE_ANTIGRAVITY_DEBUG=1         # debug
-OPENCODE_ANTIGRAVITY_LOG_DIR=/path   # log_dir
-OPENCODE_ANTIGRAVITY_KEEP_THINKING=1 # keep_thinking
-```
-
-<details>
-<summary>Create `~/.config/opencode/antigravity.json` (or `.opencode/antigravity.json` in project root):</summary>
-
-```jsonc
-{
-  // JSON Schema for IDE autocompletion
-  "$schema": "https://raw.githubusercontent.com/anthropics/opencode-antigravity-auth/main/assets/antigravity.schema.json",
-
-  // === General ===
-  "quiet_mode": false,           // Suppress toast notifications (except recovery)
-  "debug": false,                // Enable debug logging to file
-  "log_dir": "/custom/log/path", // Custom debug log directory (optional)
-  "auto_update": true,           // Auto-update plugin
-
-  // === Thinking Blocks ===
-  "keep_thinking": false,        // Preserve thinking blocks (may cause signature errors)
-
-  // === Session Recovery ===
-  "session_recovery": true,      // Auto-recover from tool_result_missing errors
-  "auto_resume": true,           // Auto-send "continue" after recovery
-  "resume_text": "continue",     // Custom resume prompt text
-
-  // === Empty Response Handling ===
-  "empty_response_max_attempts": 4,      // Max retries for empty responses
-  "empty_response_retry_delay_ms": 2000, // Delay between retries (ms)
-
-  // === Tool Handling ===
-  "tool_id_recovery": true,       // Fix mismatched tool IDs from context compaction
-  "claude_tool_hardening": true,  // Prevent Claude tool hallucinations
-
-  // === Token Refresh ===
-  "proactive_token_refresh": true,              // Background token refresh
-  "proactive_refresh_buffer_seconds": 1800,     // Refresh 30min before expiry
-  "proactive_refresh_check_interval_seconds": 300, // Check every 5min
-
-  // === Rate Limiting ===
-  "max_rate_limit_wait_seconds": 300, // Max wait time when rate limited (0=unlimited)
-  "quota_fallback": false,            // Try alternate quota when rate limited
-
-  // === Signature Cache (for keep_thinking=true) ===
-  "signature_cache": {
-    "enabled": true,
-    "memory_ttl_seconds": 3600,      // 1 hour in-memory
-    "disk_ttl_seconds": 172800,      // 48 hours on disk
-    "write_interval_seconds": 60     // Background write interval
   }
 }
 ```
@@ -332,117 +260,180 @@ OPENCODE_ANTIGRAVITY_KEEP_THINKING=1 # keep_thinking
 Add multiple Google accounts for higher combined quotas. The plugin automatically rotates between accounts when one is rate-limited.
 
 ```bash
-# Add accounts
 opencode auth login
 ```
 
-## Compatible Plugins
+<details>
+<summary><b>How multi-account works</b></summary>
 
-This plugin works alongside other OpenCode plugins. Some important notes:
+### Load Balancing Behavior
 
-### Plugin Ordering
+- **Sticky account selection** - Sticks to the same account until rate-limited (preserves Anthropic's prompt cache)
+- **Per-model-family limits** - Rate limits tracked separately for Claude and Gemini models
+- **Dual quota pools for Gemini** - Automatic fallback between Antigravity quota and Gemini CLI quota before switching accounts
+- **Smart retry threshold** - Short rate limits (≤5s) are retried on same account
+- **Exponential backoff** - Increasing delays for consecutive rate limits
 
-If using `@tarquinen/opencode-dcp` (Dynamic Context Protocol), **our plugin must be listed first**:
+### Dual Quota Pools (Gemini only)
+
+For Gemini models, the plugin accesses **two independent quota pools** per account:
+
+| Quota Pool | When Used |
+|------------|-----------|
+| **Antigravity** | Primary (tried first) |
+| **Gemini CLI** | Fallback when Antigravity is rate-limited |
+
+This effectively **doubles your Gemini quota** per account.
+
+### Adding Accounts
+
+When running `opencode auth login` with existing accounts:
+
+```
+2 account(s) saved:
+  1. user1@gmail.com
+  2. user2@gmail.com
+
+(a)dd new account(s) or (f)resh start? [a/f]:
+```
+
+### Account Storage
+
+- Stored in `~/.config/opencode/antigravity-accounts.json`
+- Contains OAuth refresh tokens - **treat like a password**
+- If Google revokes a token (`invalid_grant`), that account is automatically removed
+
+</details>
+
+## Configuration
+
+Create `~/.config/opencode/antigravity.json` (or `.opencode/antigravity.json` in project root):
+
+### General Settings
+
+| Option | Default | Description |
+|--------|---------|-------------|
+| `quiet_mode` | `false` | Suppress toast notifications (except recovery) |
+| `debug` | `false` | Enable debug logging to file |
+| `log_dir` | OS default | Custom directory for debug logs |
+| `auto_update` | `true` | Enable automatic plugin updates |
+
+### Session Recovery
+
+| Option | Default | Description |
+|--------|---------|-------------|
+| `session_recovery` | `true` | Auto-recover from tool_result_missing errors |
+| `auto_resume` | `true` | Auto-send resume prompt after recovery |
+| `resume_text` | `"continue"` | Text to send when auto-resuming |
+
+### Error Recovery
+
+| Option | Default | Description |
+|--------|---------|-------------|
+| `empty_response_max_attempts` | `4` | Retries for empty API responses |
+| `empty_response_retry_delay_ms` | `2000` | Delay between retries |
+| `tool_id_recovery` | `true` | Fix mismatched tool IDs from context compaction |
+| `claude_tool_hardening` | `true` | Prevent tool parameter hallucination |
+
+### Token Management
+
+| Option | Default | Description |
+|--------|---------|-------------|
+| `proactive_token_refresh` | `true` | Refresh tokens before expiry |
+| `proactive_refresh_buffer_seconds` | `1800` | Refresh 30min before expiry |
+| `max_rate_limit_wait_seconds` | `300` | Max wait time when rate limited (0=unlimited) |
+| `quota_fallback` | `false` | Try alternate quota when rate limited |
+
+### Environment Overrides
+
+```bash
+OPENCODE_ANTIGRAVITY_QUIET=1         # quiet_mode
+OPENCODE_ANTIGRAVITY_DEBUG=1         # debug
+OPENCODE_ANTIGRAVITY_LOG_DIR=/path   # log_dir
+OPENCODE_ANTIGRAVITY_KEEP_THINKING=1 # keep_thinking
+```
+
+<details>
+<summary><b>Full configuration example</b></summary>
+
+```json
+{
+  "$schema": "https://raw.githubusercontent.com/anthropics/opencode-antigravity-auth/main/assets/antigravity.schema.json",
+  "quiet_mode": false,
+  "debug": false,
+  "log_dir": "/custom/log/path",
+  "auto_update": true,
+  "keep_thinking": false,
+  "session_recovery": true,
+  "auto_resume": true,
+  "resume_text": "continue",
+  "empty_response_max_attempts": 4,
+  "empty_response_retry_delay_ms": 2000,
+  "tool_id_recovery": true,
+  "claude_tool_hardening": true,
+  "proactive_token_refresh": true,
+  "proactive_refresh_buffer_seconds": 1800,
+  "proactive_refresh_check_interval_seconds": 300,
+  "max_rate_limit_wait_seconds": 300,
+  "quota_fallback": false,
+  "signature_cache": {
+    "enabled": true,
+    "memory_ttl_seconds": 3600,
+    "disk_ttl_seconds": 172800,
+    "write_interval_seconds": 60
+  }
+}
+```
+
+</details>
+
+## Known Plugin Interactions
+
+### @tarquinen/opencode-dcp
+
+DCP creates synthetic assistant messages that lack thinking blocks. **Our plugin must be listed BEFORE DCP:**
 
 ```json
 {
   "plugin": [
     "opencode-antigravity-auth@beta",
-    "@tarquinen/opencode-dcp@1.1.2"
+    "@tarquinen/opencode-dcp@latest",
   ]
 }
 ```
+
+### oh-my-opencode
+
+When spawning parallel subagents, multiple processes may select the same account causing rate limit errors. **Workaround:** Add more accounts via `opencode auth login`.
 
 ### Plugins You Don't Need
 
 - **gemini-auth plugins** - Not needed. This plugin handles all Google OAuth authentication.
 
-### Rate Limit Considerations
-
-- **oh-my-opencode** - This plugin may make background API calls that consume your quota. If you're hitting rate limits unexpectedly, check if oh-my-opencode is making requests.
-
-## Migration Guide (v1.2.7+)
-
 <details>
-<summary>If upgrading from v1.2.6 or earlier, follow these steps:</summary>
+<summary><b>Migration Guide (v1.2.7+)</b></summary>
 
-### Step 1: Clear Old Tokens (Optional)
+If upgrading from v1.2.6 or earlier:
+
+### Breaking Changes
+
+| Old (v1.2.6) | New (v1.2.7+) |
+|--------------|---------------|
+| `gemini-3-pro` | `google/antigravity-gemini-3-pro-low` |
+| `claude-sonnet-4-5` | `google/antigravity-claude-sonnet-4-5` |
+
+### Step 1: Clear Old Tokens (Optional do this if you have issue cannot call models)
 
 ```bash
 rm -rf ~/.config/opencode/antigravity-account.json
-```
-
-Then reauth
-```bash
 opencode auth login
 ```
 
 ### Step 2: Update opencode.json
 
-Replace your old provider google config with:
-
-```json
-"provider": {
-    "google": {
-      "models": {
-        "antigravity-gemini-3-pro-low": {
-          "name": "Gemini 3 Pro Low (Antigravity)",
-          "limit": { "context": 1048576, "output": 65535 },
-          "modalities": { "input": ["text", "image", "pdf"], "output": ["text"] }
-        },
-        "antigravity-gemini-3-pro-high": {
-          "name": "Gemini 3 Pro High (Antigravity)",
-          "limit": { "context": 1048576, "output": 65535 },
-          "modalities": { "input": ["text", "image", "pdf"], "output": ["text"] }
-        },
-        "antigravity-gemini-3-flash": {
-          "name": "Gemini 3 Flash (Antigravity)",
-          "limit": { "context": 1048576, "output": 65536 },
-          "modalities": { "input": ["text", "image", "pdf"], "output": ["text"] }
-        },
-        "antigravity-claude-sonnet-4-5": {
-          "name": "Claude Sonnet 4.5 (Antigravity)",
-          "limit": { "context": 200000, "output": 64000 },
-          "modalities": { "input": ["text", "image", "pdf"], "output": ["text"] }
-        },
-        "antigravity-claude-sonnet-4-5-thinking-low": {
-          "name": "Claude Sonnet 4.5 Think Low (Antigravity)",
-          "limit": { "context": 200000, "output": 64000 },
-          "modalities": { "input": ["text", "image", "pdf"], "output": ["text"] }
-        },
-        "antigravity-claude-sonnet-4-5-thinking-medium": {
-          "name": "Claude Sonnet 4.5 Think Medium (Antigravity)",
-          "limit": { "context": 200000, "output": 64000 },
-          "modalities": { "input": ["text", "image", "pdf"], "output": ["text"] }
-        },
-        "antigravity-claude-sonnet-4-5-thinking-high": {
-          "name": "Claude Sonnet 4.5 Think High (Antigravity)",
-          "limit": { "context": 200000, "output": 64000 },
-          "modalities": { "input": ["text", "image", "pdf"], "output": ["text"] }
-        },
-        "antigravity-claude-opus-4-5-thinking-low": {
-          "name": "Claude Opus 4.5 Think Low (Antigravity)",
-          "limit": { "context": 200000, "output": 64000 },
-          "modalities": { "input": ["text", "image", "pdf"], "output": ["text"] }
-        },
-        "antigravity-claude-opus-4-5-thinking-medium": {
-          "name": "Claude Opus 4.5 Think Medium (Antigravity)",
-          "limit": { "context": 200000, "output": 64000 },
-          "modalities": { "input": ["text", "image", "pdf"], "output": ["text"] }
-        },
-        "antigravity-claude-opus-4-5-thinking-high": {
-          "name": "Claude Opus 4.5 Think High (Antigravity)",
-          "limit": { "context": 200000, "output": 64000 },
-          "modalities": { "input": ["text", "image", "pdf"], "output": ["text"] }
-        }
-      }
-    }
-}
-```
+Models now use `antigravity-` prefix for Antigravity quota. See [Available Models](#available-models).
 
 ### Step 3: Create antigravity.json (Optional)
-
-If you had custom settings, migrate them to `~/.config/opencode/antigravity.json`:
 
 ```json
 {
@@ -452,25 +443,10 @@ If you had custom settings, migrate them to `~/.config/opencode/antigravity.json
 }
 ```
 
-### Step 4: Re-authenticate
-
-Run OpenCode once. A browser window will open for Google OAuth:
-
-```bash
-opencode
-```
-
-### Breaking Changes
-
-| Old (v1.2.6) | New (v1.2.7+) |
-|--------------|---------------|
-| `OPENCODE_ANTIGRAVITY_*` env vars | `~/.config/opencode/antigravity.json` |
-| `gemini-3-pro` | `google/antigravity-gemini-3-pro-low` |
-| `claude-sonnet-4-5` | `google/antigravity-claude-sonnet-4-5` |
-
 </details>
 
-## E2E Testing
+<details>
+<summary><b>E2E Testing</b></summary>
 
 The plugin includes regression tests for stability verification. Tests consume API quota.
 
@@ -478,10 +454,10 @@ The plugin includes regression tests for stability verification. Tests consume A
 # Sanity tests (7 tests, ~5 min)
 npx tsx script/test-regression.ts --sanity
 
-# Heavy tests (4 tests, ~30 min) - stress testing with 8-50 turn conversations
+# Heavy tests (4 tests, ~30 min)
 npx tsx script/test-regression.ts --heavy
 
-# Concurrent tests (3 tests) - rate limit handling with 5-10 parallel requests
+# Concurrent tests (3 tests)
 npx tsx script/test-regression.ts --category concurrency
 
 # Run specific test
@@ -491,24 +467,60 @@ npx tsx script/test-regression.ts --test thinking-tool-use
 npx tsx script/test-regression.ts --dry-run
 ```
 
+</details>
+
 ## Debugging
 
-Enable debug logging:
-
 ```bash
-# Via environment
-OPENCODE_ANTIGRAVITY_DEBUG=1 opencode
-
-# Via config
-echo '{"debug": true}' > ~/.config/opencode/antigravity.json
+OPENCODE_ANTIGRAVITY_DEBUG=1 opencode   # Basic logging
+OPENCODE_ANTIGRAVITY_DEBUG=2 opencode   # Verbose (full request/response bodies)
 ```
 
-Logs are written to `~/.config/opencode/antigravity-logs/` (or `log_dir` if configured).
+Logs are written to `~/.config/opencode/antigravity-logs/`.
 
 ## Documentation
 
 - [Architecture](docs/ARCHITECTURE.md) - Plugin internals and request flow
 - [API Spec](docs/ANTIGRAVITY_API_SPEC.md) - Antigravity API reference
+
+<details>
+<summary><b>Safety, Usage & Legal</b></summary>
+
+### Intended Use
+
+- Personal / internal development only
+- Respect internal quotas and data handling policies
+- Not for production services or bypassing intended limits
+
+### Warning (Assumption of Risk)
+
+By using this plugin, you acknowledge:
+
+- **Terms of Service risk** - This approach may violate ToS of AI model providers
+- **Account risk** - Providers may suspend or ban accounts
+- **No guarantees** - APIs may change without notice
+- **Assumption of risk** - You assume all legal, financial, and technical risks
+
+### Legal
+
+- Not affiliated with Google. This is an independent open-source project.
+- "Antigravity", "Gemini", "Google Cloud", and "Google" are trademarks of Google LLC.
+- Software is provided "as is", without warranty.
+
+</details>
+
+## Credits
+
+Built with help from:
+
+- [opencode-gemini-auth](https://github.com/jenslys/opencode-gemini-auth) - Gemini OAuth groundwork by [@jenslys](https://github.com/jenslys)
+- [CLIProxyAPI](https://github.com/router-for-me/CLIProxyAPI) - Antigravity API reference
+
+## Support
+
+If this plugin helps you, consider supporting its continued maintenance:
+
+[![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/S6S81QBOIR)
 
 ## License
 
