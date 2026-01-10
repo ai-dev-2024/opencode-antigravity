@@ -544,7 +544,8 @@ Try add this line to in `google` field under `provider`
 ### Error during the session
 If you encounter error during the session, try chat `continue` the recover session mechanism should be trigger and you can continue the session, if the error blocked the session please workaround by use command `/undo` to revert to the state before the error and try again it should work
 
-### Safari OAuth Callback Fails (macOS)
+<details>
+<summary><b>Safari OAuth Callback Fails (macOS)</b></summary>
 
 **Symptoms:**
 - "fail to authorize" after successful Google login in browser
@@ -569,7 +570,10 @@ If you encounter error during the session, try chat `continue` the recover sessi
    - The URL should contain `?code=...&scope=...`
    - This auth code can be used manually (see [issue #119](https://github.com/NoeFabris/opencode-antigravity-auth/issues/119) for updates on manual auth support)
 
-### Port Already in Use
+</details>
+
+<details>
+<summary><b>Port Already in Use</b></summary>
 
 If OAuth fails with "Address already in use" or similar port binding errors:
 
@@ -598,13 +602,18 @@ taskkill /PID <PID> /F
 opencode auth login
 ```
 
-### WSL2 / Remote Development
+</details>
+
+<details>
+<summary><b>WSL2 / Remote Development</b></summary>
 
 For users running OpenCode in WSL2 or over SSH:
 - The OAuth callback requires the browser to reach `localhost` on the machine running OpenCode
 - For WSL2: Ensure port forwarding is configured, or use VS Code's port forwarding
 - For SSH: Use SSH port forwarding: `ssh -L 8080:localhost:8080 user@remote`
 - For headless servers: See [issue #119](https://github.com/NoeFabris/opencode-antigravity-auth/issues/119) for manual URL auth (in development)
+
+</details>
 
 ## Known Plugin Interactions
 
