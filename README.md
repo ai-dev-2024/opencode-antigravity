@@ -853,6 +853,16 @@ If this plugin helps you, consider supporting its continued maintenance:
 
 [![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/S6S81QBOIR)
 
+---
+
+### Fork Maintainer
+
+This fork is maintained with additional features for OpenCode built-in model compatibility:
+
+[![Support Fork Maintainer](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/ai_dev_2024)
+
+> Inspired by and built upon the excellent work of [@NoeFabris](https://github.com/NoeFabris/opencode-antigravity-auth)
+
 ## License
 
 MIT

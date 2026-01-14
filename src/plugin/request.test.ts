@@ -3,6 +3,7 @@ import {
   prepareAntigravityRequest,
   getPluginSessionId,
   isGenerativeLanguageRequest,
+  isAntigravityModelRequest,
   __testExports,
 } from "./request";
 import type { SignatureStore, ThoughtBuffer, StreamingCallbacks, StreamingOptions } from "./core/streaming/types";
@@ -62,6 +63,7 @@ describe("request.ts", () => {
     });
   });
 
+
   describe("isGenerativeLanguageRequest", () => {
     it("returns true for generativelanguage.googleapis.com URLs", () => {
       expect(isGenerativeLanguageRequest("https://generativelanguage.googleapis.com/v1/models")).toBe(true);
@@ -76,6 +78,94 @@ describe("request.ts", () => {
       expect(isGenerativeLanguageRequest(new Request("https://example.com"))).toBe(false);
     });
   });
+
+  describe("isAntigravityModelRequest", () => {
+    it("returns true for antigravity- prefixed models", () => {
+      expect(isAntigravityModelRequest(
+        "https://generativelanguage.googleapis.com/v1/models/antigravity-gemini-3-pro:generateContent"
+      )).toBe(true);
+      expect(isAntigravityModelRequest(
+        "https://generativelanguage.googleapis.com/v1/models/antigravity-gemini-3-flash:streamGenerateContent"
+      )).toBe(true);
+    });
+
+    it("returns true for claude models", () => {
+      expect(isAntigravityModelRequest(
+        "https://generativelanguage.googleapis.com/v1/models/claude-sonnet-4-5:generateContent"
+      )).toBe(true);
+      expect(isAntigravityModelRequest(
+        "https://generativelanguage.googleapis.com/v1/models/claude-opus-4-5-thinking:generateContent"
+      )).toBe(true);
+    });
+
+    it("returns true for gpt models", () => {
+      expect(isAntigravityModelRequest(
+        "https://generativelanguage.googleapis.com/v1/models/gpt-4o:generateContent"
+      )).toBe(true);
+    });
+
+    it("returns true for gemini-2.5 models", () => {
+      expect(isAntigravityModelRequest(
+        "https://generativelanguage.googleapis.com/v1/models/gemini-2.5-flash:generateContent"
+      )).toBe(true);
+      expect(isAntigravityModelRequest(
+        "https://generativelanguage.googleapis.com/v1/models/gemini-2.5-pro:streamGenerateContent"
+      )).toBe(true);
+    });
+
+    it("returns true for gemini-2.0 models", () => {
+      expect(isAntigravityModelRequest(
+        "https://generativelanguage.googleapis.com/v1/models/gemini-2.0-flash:generateContent"
+      )).toBe(true);
+    });
+
+    it("returns true for legacy gemini-3 models (without -preview)", () => {
+      expect(isAntigravityModelRequest(
+        "https://generativelanguage.googleapis.com/v1/models/gemini-3-pro-low:generateContent"
+      )).toBe(true);
+      expect(isAntigravityModelRequest(
+        "https://generativelanguage.googleapis.com/v1/models/gemini-3-flash:generateContent"
+      )).toBe(true);
+    });
+
+    it("returns false for gemini-3-preview models (Gemini CLI)", () => {
+      expect(isAntigravityModelRequest(
+        "https://generativelanguage.googleapis.com/v1/models/gemini-3-pro-preview:generateContent"
+      )).toBe(false);
+      expect(isAntigravityModelRequest(
+        "https://generativelanguage.googleapis.com/v1/models/gemini-3-flash-preview:generateContent"
+      )).toBe(false);
+    });
+
+    it("returns false for OpenCode built-in models like grok", () => {
+      expect(isAntigravityModelRequest(
+        "https://generativelanguage.googleapis.com/v1/models/grok-code-fast-1:generateContent"
+      )).toBe(false);
+    });
+
+    it("returns false for minimax models", () => {
+      expect(isAntigravityModelRequest(
+        "https://generativelanguage.googleapis.com/v1/models/minimax-m2-1:generateContent"
+      )).toBe(false);
+    });
+
+    it("returns false for unknown models", () => {
+      expect(isAntigravityModelRequest(
+        "https://generativelanguage.googleapis.com/v1/models/some-unknown-model:generateContent"
+      )).toBe(false);
+    });
+
+    it("returns false for non-Google API URLs", () => {
+      expect(isAntigravityModelRequest("https://api.openai.com/v1/chat")).toBe(false);
+      expect(isAntigravityModelRequest("https://api.anthropic.com/v1/messages")).toBe(false);
+    });
+
+    it("returns true when model cannot be extracted (conservative default)", () => {
+      // URL without model pattern should be handled by plugin (conservative)
+      expect(isAntigravityModelRequest("https://generativelanguage.googleapis.com/v1/models")).toBe(true);
+    });
+  });
+
 
   describe("buildSignatureSessionKey", () => {
     it("builds key from sessionId, model, project, and conversation", () => {
@@ -491,13 +581,13 @@ describe("request.ts", () => {
       const transformer = createStreamingTransformer(store, defaultCallbacks);
       const encoder = new TextEncoder();
       const decoder = new TextDecoder();
-      
+
       const input = encoder.encode("data: [DONE]\n");
       const outputChunks: Uint8Array[] = [];
-      
+
       const writer = transformer.writable.getWriter();
       const reader = transformer.readable.getReader();
-      
+
       const readPromise = (async () => {
         while (true) {
           const { done, value } = await reader.read();
@@ -505,11 +595,11 @@ describe("request.ts", () => {
           if (value) outputChunks.push(value);
         }
       })();
-      
+
       await writer.write(input);
       await writer.close();
       await readPromise;
-      
+
       const output = outputChunks.map(chunk => decoder.decode(chunk)).join("");
       expect(output).toContain("[DONE]");
     });

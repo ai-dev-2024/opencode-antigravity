@@ -178,9 +178,9 @@ function resolveConversationKey(requestPayload: Record<string, unknown>): string
 
   const systemSeed = extractTextFromContent(
     (anyPayload.systemInstruction as any)?.parts
-      ?? anyPayload.systemInstruction
-      ?? anyPayload.system
-      ?? anyPayload.system_instruction,
+    ?? anyPayload.systemInstruction
+    ?? anyPayload.system
+    ?? anyPayload.system_instruction,
   );
   const messageSeed = Array.isArray(anyPayload.messages)
     ? extractConversationSeedFromMessages(anyPayload.messages)
@@ -559,6 +559,50 @@ export function isGenerativeLanguageRequest(input: RequestInfo): input is string
 }
 
 /**
+ * Models that should be handled by the Antigravity plugin.
+ * Other models using the Google Generative Language API should be bypassed
+ * to allow OpenCode's built-in free models to work correctly.
+ */
+const ANTIGRAVITY_MODEL_PATTERNS = [
+  /^antigravity-/i,              // Explicit Antigravity prefix
+  /^claude/i,                    // Claude models (only available on Antigravity)
+  /^gpt/i,                       // GPT models (only available on Antigravity)
+  /^gemini-3-(?!.*-preview)/i,   // Gemini 3 without -preview (legacy Antigravity routing)
+  /^gemini-2\.5/i,               // Gemini 2.5 models
+  /^gemini-2\.0/i,               // Gemini 2.0 models
+];
+
+/**
+ * Extracts the model name from a Google Generative Language API URL.
+ * @returns The model name or null if the URL doesn't match the expected pattern.
+ */
+function extractModelFromRequestUrl(url: string): string | null {
+  const match = url.match(/\/models\/([^:]+):/);
+  return match?.[1] ?? null;
+}
+
+/**
+ * Checks if a request should be handled by the Antigravity plugin based on the model name.
+ * 
+ * This allows OpenCode's built-in free models (like Grok, MiniMax) to bypass the plugin
+ * and use their default providers, while Antigravity-specific models are still intercepted.
+ * 
+ * @param input - The request URL or Request object
+ * @returns true if the request should be handled by Antigravity, false to bypass
+ */
+export function isAntigravityModelRequest(input: RequestInfo): boolean {
+  if (!isGenerativeLanguageRequest(input)) {
+    return false;
+  }
+  const model = extractModelFromRequestUrl(input);
+  if (!model) {
+    // If we can't determine the model, let the plugin handle it (conservative default)
+    return true;
+  }
+  return ANTIGRAVITY_MODEL_PATTERNS.some(pattern => pattern.test(model));
+}
+
+/**
  * Options for request preparation.
  */
 export interface PrepareRequestOptions {
@@ -634,10 +678,10 @@ export function prepareAntigravityRequest(
   const defaultEndpoint = headerStyle === "gemini-cli" ? GEMINI_CLI_ENDPOINT : ANTIGRAVITY_ENDPOINT;
   const baseEndpoint = endpointOverride ?? defaultEndpoint;
   const transformedUrl = `${baseEndpoint}/v1internal:${rawAction}${streaming ? "?alt=sse" : ""}`;
-    
+
   const isClaude = isClaudeModel(resolved.actualModel);
   const isClaudeThinking = isClaudeThinkingModel(resolved.actualModel);
-  
+
   // Tier-based thinking configuration from model resolver (can be overridden by variant config)
   let tierThinkingBudget = resolved.thinkingBudget;
   let tierThinkingLevel = resolved.thinkingLevel;
@@ -733,7 +777,7 @@ export function prepareAntigravityRequest(
           requestPayload.providerOptions as Record<string, unknown> | undefined
         );
         const isGemini3 = effectiveModel.toLowerCase().includes("gemini-3");
-        
+
         if (variantConfig?.thinkingLevel && isGemini3) {
           // Gemini 3 native format - use thinkingLevel directly
           tierThinkingLevel = variantConfig.thinkingLevel;
@@ -742,7 +786,7 @@ export function prepareAntigravityRequest(
           if (isGemini3) {
             // Legacy format for Gemini 3 - convert with deprecation warning
             log.warn("[Deprecated] Using thinkingBudget for Gemini 3 model. Use thinkingLevel instead.");
-            tierThinkingLevel = variantConfig.thinkingBudget <= 8192 ? "low" 
+            tierThinkingLevel = variantConfig.thinkingBudget <= 8192 ? "low"
               : variantConfig.thinkingBudget <= 16384 ? "medium" : "high";
             tierThinkingBudget = undefined;
           } else {
@@ -788,10 +832,10 @@ export function prepareAntigravityRequest(
         if (normalizedThinking) {
           // Use tier-based thinking budget if specified via model suffix, otherwise fall back to user config
           const thinkingBudget = tierThinkingBudget ?? normalizedThinking.thinkingBudget;
-          
+
           // Build thinking config based on model type
           let thinkingConfig: Record<string, unknown>;
-          
+
           if (isClaudeThinking) {
             // Claude uses snake_case keys
             thinkingConfig = {
