@@ -1,10 +1,17 @@
 # OpenCode + Antigravity Manager Integration
 
-This is a fork of [OpenCode](https://github.com/anomalyco/opencode) with integrated support for [Antigravity Manager Tool](https://github.com/ai-dev-2024/Antigravity-Manager-Supreme).
+[![CI](https://github.com/ai-dev-2024/opencode-antigravity/actions/workflows/ci.yml/badge.svg)](https://github.com/ai-dev-2024/opencode-antigravity/actions/workflows/ci.yml)
+[![Upstream Sync](https://github.com/ai-dev-2024/opencode-antigravity/actions/workflows/sync-upstream.yml/badge.svg)](https://github.com/ai-dev-2024/opencode-antigravity/actions/workflows/sync-upstream.yml)
+
+**[📦 Download Latest Release](https://github.com/ai-dev-2024/opencode-antigravity/releases/latest)**
+
+This is a fork of [OpenCode](https://github.com/anomalyco/opencode) with integrated support for [Antigravity Manager Tool](https://github.com/lbjlaq/Antigravity-Manager).
+
+> **Automatic Updates**: This repo automatically syncs with upstream OpenCode releases daily and applies Antigravity integration patches.
 
 ## What This Does
 
-Enables OpenCode (CLI + Desktop) to use **combined quota from multiple Google Cloud Code Assist accounts** managed by Antigravity Manager Tool - the same way Claude Code CLI works.
+Enables OpenCode (CLI + Desktop) to use **combined quota from multiple AI accounts** managed by Antigravity Manager Tool.
 
 ## Features
 
