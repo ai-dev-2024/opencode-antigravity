@@ -108,8 +108,10 @@ jobs:
 
       - name: Merge upstream
         run: |
-          # Merge upstream dev branch (OpenCode uses dev as default), keeping our changes in case of conflict
-          git merge upstream/dev --no-edit -X ours || {
+          # Merge upstream dev branch (OpenCode uses dev as default)
+          # --allow-unrelated-histories handles initial sync when repos have different git roots
+          # -X ours keeps our changes in case of conflict
+          git merge upstream/dev --no-edit --allow-unrelated-histories -X ours || {
             echo "Merge had conflicts, auto-resolved with 'ours' strategy"
             git add .
             git commit -m "Merge upstream v${{ needs.check-upstream.outputs.upstream_version }} (conflicts auto-resolved)"
