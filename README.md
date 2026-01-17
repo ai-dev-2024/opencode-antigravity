@@ -39,23 +39,35 @@ Enables OpenCode (CLI + Desktop) to use **combined quota from multiple AI accoun
 
 ## Installation
 
+### Download Pre-Built Releases (Recommended)
+
+Download from [**GitHub Releases**](https://github.com/ai-dev-2024/opencode-antigravity/releases):
+
+| Platform | CLI | Desktop |
+|----------|-----|---------|
+| Windows | `opencode-windows-x64.exe` | `OpenCode_*_x64-setup.exe` |
+| Linux | `opencode-linux-x64` | `OpenCode_*_amd64.AppImage` |
+
+### Automated Updates
+
+This repo automatically:
+1. **Syncs daily** with upstream OpenCode releases
+2. **Applies patches** for Antigravity integration and bug fixes
+3. **Builds CLI + Desktop** for Windows and Linux
+4. **Publishes releases** to GitHub
+
 ### Build from Source
 
 ```bash
-# Clone this repo
 git clone https://github.com/ai-dev-2024/opencode-antigravity.git
 cd opencode-antigravity
-
-# Install dependencies
 bun install
 
-# Build CLI
-cd packages/opencode
-bun run build
+# CLI
+cd packages/opencode && bun run build
 
-# Build Desktop (requires Tauri)
-cd packages/desktop
-bun run build
+# Desktop (requires Rust)
+cd packages/desktop && bunx tauri build
 ```
 
 ### GitHub Releases
