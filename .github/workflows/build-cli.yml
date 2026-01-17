@@ -31,6 +31,12 @@ jobs:
           - os: windows-latest
             target: windows-x64
             artifact_name: opencode-windows-x64.exe
+          - os: macos-13
+            target: macos-x64
+            artifact_name: opencode-macos-x64
+          - os: macos-14
+            target: macos-arm64
+            artifact_name: opencode-macos-arm64
 
     steps:
       - name: Checkout

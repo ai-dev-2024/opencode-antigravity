@@ -31,6 +31,12 @@ jobs:
           - platform: linux
             os: ubuntu-22.04
             target: x86_64-unknown-linux-gnu
+          - platform: macos-intel
+            os: macos-13
+            target: x86_64-apple-darwin
+          - platform: macos-arm
+            os: macos-14
+            target: aarch64-apple-darwin
 
     steps:
       - name: Checkout
@@ -85,6 +91,8 @@ jobs:
             packages/desktop/target/${{ matrix.target }}/release/bundle/**/*.exe
             packages/desktop/target/${{ matrix.target }}/release/bundle/**/*.AppImage
             packages/desktop/target/${{ matrix.target }}/release/bundle/**/*.deb
+            packages/desktop/target/${{ matrix.target }}/release/bundle/**/*.dmg
+            packages/desktop/target/${{ matrix.target }}/release/bundle/**/*.app
           retention-days: 30
 
   release:
@@ -125,6 +133,8 @@ jobs:
             | Windows | MSI | `OpenCode_*_x64_en-US.msi` |
             | Linux | AppImage | `OpenCode_*_amd64.AppImage` |
             | Linux | Deb | `OpenCode_*_amd64.deb` |
+            | macOS Intel | DMG | `OpenCode_*_x64.dmg` |
+            | macOS ARM | DMG | `OpenCode_*_aarch64.dmg` |
             
             ### Installation
             
@@ -135,6 +145,8 @@ jobs:
             chmod +x OpenCode_*_amd64.AppImage
             ./OpenCode_*_amd64.AppImage
             ```
+            
+            **macOS:** Open the DMG and drag to Applications
             
             ### Antigravity Setup
             

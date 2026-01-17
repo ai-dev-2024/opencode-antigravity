@@ -45,8 +45,10 @@ Download from [**GitHub Releases**](https://github.com/ai-dev-2024/opencode-anti
 
 | Platform | CLI | Desktop |
 |----------|-----|---------|
-| Windows | `opencode-windows-x64.exe` | `OpenCode_*_x64-setup.exe` |
-| Linux | `opencode-linux-x64` | `OpenCode_*_amd64.AppImage` |
+| Windows x64 | `opencode-windows-x64.exe` | `OpenCode_*_x64-setup.exe` |
+| Linux x64 | `opencode-linux-x64` | `OpenCode_*_amd64.AppImage` |
+| macOS Intel | `opencode-macos-x64` | `OpenCode_*_x64.dmg` |
+| macOS ARM | `opencode-macos-arm64` | `OpenCode_*_aarch64.dmg` |
 
 ### Automated Updates
 
