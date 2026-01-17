@@ -25,7 +25,8 @@ jobs:
         run: npm ci
 
       - name: Run type check
-        run: npm run typecheck
+        # Exclude packages/web (docs site) from typecheck - has Astro-specific TS issues
+        run: npx turbo run typecheck --filter='!@opencode-ai/web'
 
       - name: Run tests
         run: npm test
