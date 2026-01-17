@@ -1,164 +1,112 @@
 # OpenCode + Antigravity Manager Integration
 
-[![CI](https://github.com/ai-dev-2024/opencode-antigravity/actions/workflows/ci.yml/badge.svg)](https://github.com/ai-dev-2024/opencode-antigravity/actions/workflows/ci.yml)
-[![Upstream Sync](https://github.com/ai-dev-2024/opencode-antigravity/actions/workflows/sync-upstream.yml/badge.svg)](https://github.com/ai-dev-2024/opencode-antigravity/actions/workflows/sync-upstream.yml)
+[![GitHub Release](https://img.shields.io/github/v/release/ai-dev-2024/opencode-antigravity)](https://github.com/ai-dev-2024/opencode-antigravity/releases)
 
-**[📦 Download Latest Release](https://github.com/ai-dev-2024/opencode-antigravity/releases/latest)**
-
-This is a fork of [OpenCode](https://github.com/anomalyco/opencode) with integrated support for [Antigravity Manager Tool](https://github.com/lbjlaq/Antigravity-Manager).
-
-> **Automatic Updates**: This repo automatically syncs with upstream OpenCode releases daily and applies Antigravity integration patches.
-
-## What This Does
-
-Enables OpenCode (CLI + Desktop) to use **combined quota from multiple AI accounts** managed by Antigravity Manager Tool.
-
-## Features
-
-- ✅ **Combined Quota** - Use all 4 accounts' quota from Antigravity Manager
-- ✅ **All Antigravity Models** - Claude and Gemini models via Antigravity proxy
-- ✅ **CLI + Desktop** - Works with both OpenCode CLI and Desktop app
-- ✅ **Free Models Too** - Native OpenCode free models (MiniMax, Grok, etc.) still work
-
-## Prerequisites
-
-1. **Antigravity Manager Tool** must be running on `http://127.0.0.1:8888`
-2. Accounts authenticated in Antigravity Manager
+Use [OpenCode](https://github.com/anomalyco/opencode) with [Antigravity Manager Tool](https://github.com/lbjlaq/Antigravity-Manager) for **combined quota from multiple AI accounts**.
 
 ## How It Works
 
 ```
-┌──────────────┐     ┌───────────────────┐     ┌─────────────────┐
-│  OpenCode    │────▶│ Antigravity Mgr   │────▶│ Google Cloud    │
-│  CLI/Desktop │     │ Proxy :8888       │     │ Code Assist API │
-└──────────────┘     └───────────────────┘     └─────────────────┘
-                           │
-                     Combined quota from
-                     4 authenticated accounts
+┌───────────────┐
+│   OpenCode    │──────────────────────────────┐
+│   CLI/Desktop │                              │
+└───────┬───────┘                              │
+        │                                      │
+        ├─── Free Models ──────────────────▶ OpenCode Zen
+        │    (MiniMax, Grok, etc.)             (opencode.ai/zen)
+        │
+        └─── Antigravity Models ───────────▶ Antigravity Manager
+             (claude, gemini-3-pro, etc.)      (localhost:8888)
+                                                    │
+                                              ┌─────┴─────┐
+                                              │ 4 Accounts│
+                                              │ Auto-rotation │
+                                              └───────────┘
 ```
 
-## Installation
+## Quick Setup
 
-### Download Pre-Built Releases (Recommended)
+### 1. Start Antigravity Manager
 
-Download from [**GitHub Releases**](https://github.com/ai-dev-2024/opencode-antigravity/releases):
+Download from [lbjlaq/Antigravity-Manager](https://github.com/lbjlaq/Antigravity-Manager/releases) and start the service on port 8888.
 
-| Platform | CLI | Desktop |
-|----------|-----|---------|
-| Windows x64 | `opencode-windows-x64.exe` | `OpenCode_*_x64-setup.exe` |
-| Linux x64 | `opencode-linux-x64` | `OpenCode_*_amd64.AppImage` |
-| macOS Intel | `opencode-macos-x64` | `OpenCode_*_x64.dmg` |
-| macOS ARM | `opencode-macos-arm64` | `OpenCode_*_aarch64.dmg` |
+### 2. Configure OpenCode
 
-### Automated Updates
-
-This repo automatically:
-1. **Syncs daily** with upstream OpenCode releases
-2. **Applies patches** for Antigravity integration and bug fixes
-3. **Builds CLI + Desktop** for Windows and Linux
-4. **Publishes releases** to GitHub
-
-### Build from Source
-
-```bash
-git clone https://github.com/ai-dev-2024/opencode-antigravity.git
-cd opencode-antigravity
-bun install
-
-# CLI
-cd packages/opencode && bun run build
-
-# Desktop (requires Rust)
-cd packages/desktop && bunx tauri build
-```
-
-### GitHub Releases
-
-Download pre-built binaries from the [Releases](https://github.com/ai-dev-2024/opencode-antigravity/releases) page.
-
-## Configuration
-
-Copy the example configs from the `config-templates/` folder or add manually to `~/.config/opencode/opencode.json`:
+Add to `~/.config/opencode/opencode.json`:
 
 ```json
 {
-  "plugin": ["opencode-antigravity-auth@beta"],
+  "$schema": "https://opencode.ai/config.json",
   "provider": {
-    "google": {
+    "antigravity": {
+      "npm": "@ai-sdk/openai-compatible",
+      "name": "Antigravity Manager",
+      "options": {
+        "baseURL": "http://127.0.0.1:8888/v1",
+        "apiKey": "sk-antigravity"
+      },
       "models": {
-        "antigravity-gemini-3-pro": { "name": "Gemini 3 Pro (Antigravity)" },
-        "antigravity-gemini-3-flash": { "name": "Gemini 3 Flash (Antigravity)" },
-        "antigravity-claude-sonnet-4-5": { "name": "Claude Sonnet 4.5 (Antigravity)" },
-        "antigravity-claude-opus-4-5-thinking": { "name": "Claude Opus 4.5 Thinking (Antigravity)" }
+        "gemini-3-pro-high": {
+          "name": "Gemini 3 Pro (Antigravity)",
+          "limit": { "context": 1048576, "output": 65535 }
+        },
+        "gemini-3-flash": {
+          "name": "Gemini 3 Flash (Antigravity)",
+          "limit": { "context": 1048576, "output": 65536 }
+        },
+        "claude-opus-4-5-thinking": {
+          "name": "Claude Opus 4.5 Thinking",
+          "limit": { "context": 200000, "output": 64000 }
+        },
+        "claude-sonnet-4-5-thinking": {
+          "name": "Claude Sonnet 4.5 Thinking",
+          "limit": { "context": 200000, "output": 64000 }
+        }
       }
     }
   }
 }
 ```
 
-Then install the plugin:
+### 3. Connect Provider
 
-```bash
-cd ~/.config/opencode
-npm install opencode-antigravity-auth@beta
-```
+In OpenCode:
+1. Run `/connect`
+2. Select "Other"
+3. Enter `antigravity` as provider ID
+4. Enter `sk-antigravity` as API key
 
-## ⚠️ Important Notes
+### 4. Select Model
 
-### Config File Locations
+Run `/models` and select any Antigravity model!
 
-OpenCode may read from **two locations** (platform dependent):
-- `~/.config/opencode/opencode.json` (Linux/macOS/Windows)
-- `%APPDATA%\opencode\opencode.json` (Windows only)
+## Features
 
-Make sure the plugin is disabled/enabled in **both** if issues persist.
+- ✅ **Combined Quota** - Use all accounts' quota from Antigravity Manager
+- ✅ **Auto-Rotation** - Automatic account switching on rate limits
+- ✅ **Free Models Work** - OpenCode's native free models (MiniMax, Grok) unaffected
+- ✅ **No Plugin Required** - Uses OpenCode's native custom provider feature
 
-### Free Models Still Work
+## Available Models
 
-OpenCode's built-in free models (MiniMax, Grok, GLM-4.7, etc.) work **without** Antigravity Manager. The plugin only intercepts Antigravity-prefixed models.
+| Model | Description |
+|-------|-------------|
+| `gemini-3-pro-high` | Gemini 3 Pro with high quota |
+| `gemini-3-flash` | Fast Gemini responses |
+| `claude-opus-4-5-thinking` | Claude Opus with extended thinking |
+| `claude-sonnet-4-5-thinking` | Claude Sonnet with thinking |
+| `gemini-2.5-flash` | Legacy Gemini 2.5 |
 
-### CLAUDE.md Warning
+## Config Templates
 
-> ⚠️ Do NOT place a `CLAUDE.md` file in your home folder that mentions "Antigravity proxy" - it will be injected as context into ALL model responses, making every model claim it's using the proxy.
-
-
-## Code Changes
-
-The integration adds the `antigravity-manager` provider to OpenCode:
-
-**File:** `packages/opencode/src/provider/provider.ts`
-
-```typescript
-// BUNDLED_PROVIDERS
-"@ai-sdk/antigravity-manager": createAnthropic,
-
-// CUSTOM_LOADERS
-"antigravity-manager": async () => {
-  return {
-    autoload: true,
-    options: {
-      baseURL: "http://127.0.0.1:8888",
-      apiKey: "antigravity-proxy",
-      headers: {
-        "anthropic-beta": "claude-code-20250219,interleaved-thinking-2025-05-14",
-      },
-      // Custom fetch ensures messages have non-empty content
-    }
-  }
-}
-```
+See the [`config-templates/`](./config-templates/) folder for ready-to-use configuration files.
 
 ## Related Projects
 
 - [Antigravity Manager](https://github.com/lbjlaq/Antigravity-Manager) - Multi-account AI quota manager
-- [OpenCode](https://github.com/anomalyco/opencode) - Original open source AI coding agent
-
-## Support
-
-If this project helps you, consider supporting development:
-
-[![Ko-fi](https://img.shields.io/badge/Ko--fi-Support%20Development-FF5E5B?logo=ko-fi&logoColor=white)](https://ko-fi.com/ai_dev_2024)
+- [Antigravity Manager Supreme](https://github.com/ai-dev-2024/Antigravity-Manager-Supreme) - Enhanced version with additional features
+- [OpenCode](https://github.com/anomalyco/opencode) - Open source AI coding agent
 
 ## License
 
-MIT - Same as original OpenCode
+MIT
