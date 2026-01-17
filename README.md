@@ -1,6 +1,7 @@
 # OpenCode + Antigravity Manager Integration
 
 [![GitHub Release](https://img.shields.io/github/v/release/ai-dev-2024/opencode-antigravity)](https://github.com/ai-dev-2024/opencode-antigravity/releases)
+[![Auto-Update](https://github.com/ai-dev-2024/opencode-antigravity/actions/workflows/update-versions.yml/badge.svg)](https://github.com/ai-dev-2024/opencode-antigravity/actions/workflows/update-versions.yml)
 [![Ko-fi](https://img.shields.io/badge/Ko--fi-Support%20Development-FF5E5B?logo=ko-fi&logoColor=white)](https://ko-fi.com/ai_dev_2024)
 
 Use **[OpenCode](https://opencode.ai)** with **[Antigravity Manager Tool](https://github.com/lbjlaq/Antigravity-Manager)** for **combined quota from multiple AI accounts** with automatic rotation.
