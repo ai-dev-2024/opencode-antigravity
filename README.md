@@ -78,23 +78,49 @@ Download pre-built binaries from the [Releases](https://github.com/ai-dev-2024/o
 
 ## Configuration
 
-Add to your `~/.config/opencode/opencode.json`:
+Copy the example configs from the `config-templates/` folder or add manually to `~/.config/opencode/opencode.json`:
 
 ```json
 {
+  "plugin": ["opencode-antigravity-auth@beta"],
   "provider": {
-    "antigravity-manager": {
-      "npm": "@ai-sdk/antigravity-manager",
+    "google": {
       "models": {
-        "claude-opus-4-5-thinking": { "name": "Claude Opus 4.5 Thinking" },
-        "claude-sonnet-4-5": { "name": "Claude Sonnet 4.5" },
-        "gemini-3-flash": { "name": "Gemini 3 Flash" },
-        "gemini-3-pro-high": { "name": "Gemini 3 Pro High" }
+        "antigravity-gemini-3-pro": { "name": "Gemini 3 Pro (Antigravity)" },
+        "antigravity-gemini-3-flash": { "name": "Gemini 3 Flash (Antigravity)" },
+        "antigravity-claude-sonnet-4-5": { "name": "Claude Sonnet 4.5 (Antigravity)" },
+        "antigravity-claude-opus-4-5-thinking": { "name": "Claude Opus 4.5 Thinking (Antigravity)" }
       }
     }
   }
 }
 ```
+
+Then install the plugin:
+
+```bash
+cd ~/.config/opencode
+npm install opencode-antigravity-auth@beta
+```
+
+## ⚠️ Important Notes
+
+### Config File Locations
+
+OpenCode may read from **two locations** (platform dependent):
+- `~/.config/opencode/opencode.json` (Linux/macOS/Windows)
+- `%APPDATA%\opencode\opencode.json` (Windows only)
+
+Make sure the plugin is disabled/enabled in **both** if issues persist.
+
+### Free Models Still Work
+
+OpenCode's built-in free models (MiniMax, Grok, GLM-4.7, etc.) work **without** Antigravity Manager. The plugin only intercepts Antigravity-prefixed models.
+
+### CLAUDE.md Warning
+
+> ⚠️ Do NOT place a `CLAUDE.md` file in your home folder that mentions "Antigravity proxy" - it will be injected as context into ALL model responses, making every model claim it's using the proxy.
+
 
 ## Code Changes
 
