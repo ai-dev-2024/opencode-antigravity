@@ -110,8 +110,14 @@ The integration adds the `antigravity-manager` provider to OpenCode:
 
 ## Related Projects
 
-- [Antigravity Manager Supreme](https://github.com/ai-dev-2024/Antigravity-Manager-Supreme) - Account quota manager
+- [Antigravity Manager](https://github.com/lbjlaq/Antigravity-Manager) - Multi-account AI quota manager
 - [OpenCode](https://github.com/anomalyco/opencode) - Original open source AI coding agent
+
+## Support
+
+If this project helps you, consider supporting development:
+
+[![Ko-fi](https://img.shields.io/badge/Ko--fi-Support%20Development-FF5E5B?logo=ko-fi&logoColor=white)](https://ko-fi.com/ai_dev_2024)
 
 ## License
 
