@@ -1,0 +1,151 @@
+name: Build OpenCode Desktop
+
+on:
+  push:
+    tags:
+      - 'v*-antigravity*'
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version tag to build'
+        required: false
+        type: string
+
+permissions:
+  contents: write
+
+env:
+  BUN_VERSION: '1.3.5'
+
+jobs:
+  build-desktop:
+    name: Build Desktop (${{ matrix.platform }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - platform: windows
+            os: windows-latest
+            target: x86_64-pc-windows-msvc
+          - platform: linux
+            os: ubuntu-22.04
+            target: x86_64-unknown-linux-gnu
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: ${{ env.BUN_VERSION }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Setup Rust
+        uses: dtolnay/rust-action@stable
+        with:
+          targets: ${{ matrix.target }}
+
+      - name: Install Linux dependencies
+        if: matrix.platform == 'linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            libwebkit2gtk-4.1-dev \
+            libgtk-3-dev \
+            libayatana-appindicator3-dev \
+            librsvg2-dev \
+            patchelf
+
+      - name: Install dependencies
+        run: bun install
+
+      - name: Build Desktop
+        uses: tauri-apps/tauri-action@v0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          projectPath: packages/desktop
+          tauriScript: bunx tauri
+          args: --target ${{ matrix.target }}
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: opencode-desktop-${{ matrix.platform }}
+          path: |
+            packages/desktop/target/${{ matrix.target }}/release/bundle/**/*.msi
+            packages/desktop/target/${{ matrix.target }}/release/bundle/**/*.exe
+            packages/desktop/target/${{ matrix.target }}/release/bundle/**/*.AppImage
+            packages/desktop/target/${{ matrix.target }}/release/bundle/**/*.deb
+          retention-days: 30
+
+  release:
+    name: Create Release
+    needs: [build-desktop]
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/')
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+
+      - name: Get version from tag
+        id: version
+        run: |
+          VERSION=${GITHUB_REF#refs/tags/v}
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
+        with:
+          name: OpenCode + Antigravity v${{ steps.version.outputs.version }}
+          body: |
+            ## OpenCode + Antigravity v${{ steps.version.outputs.version }}
+            
+            Pre-built OpenCode Desktop with Antigravity Manager integration.
+            
+            ### Downloads
+            
+            | Platform | Type | File |
+            |----------|------|------|
+            | Windows | Installer | `OpenCode_*_x64-setup.exe` |
+            | Windows | MSI | `OpenCode_*_x64_en-US.msi` |
+            | Linux | AppImage | `OpenCode_*_amd64.AppImage` |
+            | Linux | Deb | `OpenCode_*_amd64.deb` |
+            
+            ### Installation
+            
+            **Windows:** Run the installer or MSI
+            
+            **Linux:**
+            ```bash
+            chmod +x OpenCode_*_amd64.AppImage
+            ./OpenCode_*_amd64.AppImage
+            ```
+            
+            ### Antigravity Setup
+            
+            1. Run Antigravity Manager and configure accounts
+            2. OpenCode auto-connects to `127.0.0.1:8888`
+            
+            ---
+            *Based on [OpenCode](https://github.com/anomalyco/opencode)*
+          files: |
+            artifacts/**/*
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
