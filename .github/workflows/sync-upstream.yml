@@ -15,7 +15,6 @@ on:
 permissions:
   contents: write
   pull-requests: write
-  workflows: write
 
 env:
   UPSTREAM_REPO: anomalyco/opencode
@@ -109,6 +108,9 @@ jobs:
 
       - name: Merge upstream
         run: |
+          # Backup our workflows before merge
+          cp -r .github/workflows /tmp/our-workflows
+          
           # Merge upstream dev branch (OpenCode uses dev as default)
           # --allow-unrelated-histories handles initial sync when repos have different git roots
           # -X ours keeps our changes in case of conflict
@@ -117,6 +119,12 @@ jobs:
             git add .
             git commit -m "Merge upstream v${{ needs.check-upstream.outputs.upstream_version }} (conflicts auto-resolved)"
           }
+          
+          # Restore our workflows (don't use upstream's workflow files)
+          rm -rf .github/workflows
+          cp -r /tmp/our-workflows .github/workflows
+          git add .github/workflows
+          git commit -m "chore: preserve our GitHub Actions workflows" || true
 
       - name: Apply Antigravity patches
         run: |
