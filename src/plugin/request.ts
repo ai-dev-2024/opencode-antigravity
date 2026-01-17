@@ -596,8 +596,9 @@ export function isAntigravityModelRequest(input: RequestInfo): boolean {
   }
   const model = extractModelFromRequestUrl(input);
   if (!model) {
-    // If we can't determine the model, let the plugin handle it (conservative default)
-    return true;
+    // If we can't determine the model, bypass to let native providers handle it
+    // This ensures OpenCode's free models (MiniMax, Grok, etc.) work correctly
+    return false;
   }
   return ANTIGRAVITY_MODEL_PATTERNS.some(pattern => pattern.test(model));
 }
