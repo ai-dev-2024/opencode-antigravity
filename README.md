@@ -1,8 +1,25 @@
 # OpenCode + Antigravity Manager Integration
 
 [![GitHub Release](https://img.shields.io/github/v/release/ai-dev-2024/opencode-antigravity)](https://github.com/ai-dev-2024/opencode-antigravity/releases)
+[![Ko-fi](https://img.shields.io/badge/Ko--fi-Support%20Development-FF5E5B?logo=ko-fi&logoColor=white)](https://ko-fi.com/ai_dev_2024)
 
-Use [OpenCode](https://github.com/anomalyco/opencode) with [Antigravity Manager Tool](https://github.com/lbjlaq/Antigravity-Manager) for **combined quota from multiple AI accounts**.
+Use **[OpenCode](https://opencode.ai)** with **[Antigravity Manager Tool](https://github.com/lbjlaq/Antigravity-Manager)** for **combined quota from multiple AI accounts** with automatic rotation.
+
+## 🔗 Quick Links
+
+| Resource | Link |
+|----------|------|
+| **Antigravity Manager Tool** | [Download](https://github.com/lbjlaq/Antigravity-Manager/releases) |
+| **OpenCode CLI** | [Download](https://github.com/anomalyco/opencode/releases) |
+| **OpenCode Desktop** | [Download](https://github.com/anomalyco/opencode/releases) |
+| **Support Development** | [Ko-fi](https://ko-fi.com/ai_dev_2024) |
+
+## ✅ Verified Working
+
+This integration has been tested and confirmed working with:
+- OpenCode CLI ✅
+- OpenCode Desktop ✅
+- Antigravity Manager Tool (port 8888) ✅
 
 ## How It Works
 
@@ -16,23 +33,23 @@ Use [OpenCode](https://github.com/anomalyco/opencode) with [Antigravity Manager 
         │    (MiniMax, Grok, etc.)             (opencode.ai/zen)
         │
         └─── Antigravity Models ───────────▶ Antigravity Manager
-             (claude, gemini-3-pro, etc.)      (localhost:8888)
+             (Claude, Gemini, GPT-OSS)         (localhost:8888)
                                                     │
                                               ┌─────┴─────┐
                                               │ 4 Accounts│
-                                              │ Auto-rotation │
+                                              │Auto-rotation│
                                               └───────────┘
 ```
 
-## Quick Setup
+## 🚀 Quick Setup
 
-### 1. Start Antigravity Manager
+### Step 1: Start Antigravity Manager
 
-Download from [lbjlaq/Antigravity-Manager](https://github.com/lbjlaq/Antigravity-Manager/releases) and start the service on port 8888.
+Download from **[Antigravity Manager Releases](https://github.com/lbjlaq/Antigravity-Manager/releases)** and start it. The proxy runs on `http://127.0.0.1:8888`.
 
-### 2. Configure OpenCode
+### Step 2: Configure OpenCode
 
-Add to `~/.config/opencode/opencode.json`:
+Add to `~/.config/opencode/opencode.json` (Linux/macOS) or `%USERPROFILE%\.config\opencode\opencode.json` (Windows):
 
 ```json
 {
@@ -47,20 +64,36 @@ Add to `~/.config/opencode/opencode.json`:
       },
       "models": {
         "gemini-3-pro-high": {
-          "name": "Gemini 3 Pro (Antigravity)",
+          "name": "Gemini 3 Pro High (Antigravity)",
+          "limit": { "context": 1048576, "output": 65535 }
+        },
+        "gemini-3-pro-low": {
+          "name": "Gemini 3 Pro Low (Antigravity)",
           "limit": { "context": 1048576, "output": 65535 }
         },
         "gemini-3-flash": {
           "name": "Gemini 3 Flash (Antigravity)",
           "limit": { "context": 1048576, "output": 65536 }
         },
-        "claude-opus-4-5-thinking": {
-          "name": "Claude Opus 4.5 Thinking",
+        "gemini-2.5-flash": {
+          "name": "Gemini 2.5 Flash (Antigravity)",
+          "limit": { "context": 1048576, "output": 65536 }
+        },
+        "claude-sonnet-4-5": {
+          "name": "Claude Sonnet 4.5 (Antigravity)",
           "limit": { "context": 200000, "output": 64000 }
         },
         "claude-sonnet-4-5-thinking": {
-          "name": "Claude Sonnet 4.5 Thinking",
+          "name": "Claude Sonnet 4.5 Thinking (Antigravity)",
           "limit": { "context": 200000, "output": 64000 }
+        },
+        "claude-opus-4-5-thinking": {
+          "name": "Claude Opus 4.5 Thinking (Antigravity)",
+          "limit": { "context": 200000, "output": 64000 }
+        },
+        "gpt-oss-120b-medium": {
+          "name": "GPT-OSS 120B Medium (Antigravity)",
+          "limit": { "context": 128000, "output": 16384 }
         }
       }
     }
@@ -68,45 +101,63 @@ Add to `~/.config/opencode/opencode.json`:
 }
 ```
 
-### 3. Connect Provider
+### Step 3: Connect Provider in OpenCode
 
-In OpenCode:
-1. Run `/connect`
-2. Select "Other"
-3. Enter `antigravity` as provider ID
-4. Enter `sk-antigravity` as API key
+**CLI:**
+```bash
+opencode
+# Then type: /connect
+# Select: Other
+# Provider ID: antigravity
+# API Key: sk-antigravity
+```
 
-### 4. Select Model
+**Desktop:**
+Press `Ctrl+P` → type `/connect` → Select "Other" → Enter `antigravity` and `sk-antigravity`
 
-Run `/models` and select any Antigravity model!
+### Step 4: Select Model
 
-## Features
+Run `/models` in OpenCode and select any Antigravity model!
+
+## 📋 Available Models
+
+| Model ID | Description |
+|----------|-------------|
+| `antigravity/gemini-3-pro-high` | Gemini 3 Pro with high quota |
+| `antigravity/gemini-3-pro-low` | Gemini 3 Pro with low thinking |
+| `antigravity/gemini-3-flash` | Fast Gemini 3 responses |
+| `antigravity/gemini-2.5-flash` | Legacy Gemini 2.5 |
+| `antigravity/claude-sonnet-4-5` | Claude Sonnet 4.5 |
+| `antigravity/claude-sonnet-4-5-thinking` | Claude Sonnet with extended thinking |
+| `antigravity/claude-opus-4-5-thinking` | Claude Opus with extended thinking |
+| `antigravity/gpt-oss-120b-medium` | GPT-OSS 120B model |
+
+## 💡 Features
 
 - ✅ **Combined Quota** - Use all accounts' quota from Antigravity Manager
-- ✅ **Auto-Rotation** - Automatic account switching on rate limits
+- ✅ **Auto-Rotation** - Automatic account switching on rate limits (429/401)
 - ✅ **Free Models Work** - OpenCode's native free models (MiniMax, Grok) unaffected
 - ✅ **No Plugin Required** - Uses OpenCode's native custom provider feature
+- ✅ **Claude + Gemini + GPT** - All models available through one proxy
 
-## Available Models
-
-| Model | Description |
-|-------|-------------|
-| `gemini-3-pro-high` | Gemini 3 Pro with high quota |
-| `gemini-3-flash` | Fast Gemini responses |
-| `claude-opus-4-5-thinking` | Claude Opus with extended thinking |
-| `claude-sonnet-4-5-thinking` | Claude Sonnet with thinking |
-| `gemini-2.5-flash` | Legacy Gemini 2.5 |
-
-## Config Templates
+## 📁 Config Templates
 
 See the [`config-templates/`](./config-templates/) folder for ready-to-use configuration files.
 
-## Related Projects
+## 🔗 Related Projects
 
-- [Antigravity Manager](https://github.com/lbjlaq/Antigravity-Manager) - Multi-account AI quota manager
-- [Antigravity Manager Supreme](https://github.com/ai-dev-2024/Antigravity-Manager-Supreme) - Enhanced version with additional features
-- [OpenCode](https://github.com/anomalyco/opencode) - Open source AI coding agent
+| Project | Description |
+|---------|-------------|
+| [Antigravity Manager](https://github.com/lbjlaq/Antigravity-Manager) | Multi-account AI quota manager with auto-rotation |
+| [OpenCode](https://github.com/anomalyco/opencode) | Open source AI coding agent (CLI + Desktop) |
+| [OpenCode Website](https://opencode.ai) | Official OpenCode documentation |
 
-## License
+## ☕ Support
+
+If this project helps you, consider supporting development:
+
+[![Ko-fi](https://img.shields.io/badge/Ko--fi-Support%20Development-FF5E5B?logo=ko-fi&logoColor=white&style=for-the-badge)](https://ko-fi.com/ai_dev_2024)
+
+## 📜 License
 
 MIT
