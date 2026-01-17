@@ -30,10 +30,11 @@ jobs:
 
       - name: Run type check
         # Exclude packages/web (docs site) from typecheck - has Astro-specific TS issues
-        run: bun turbo typecheck --filter='!@opencode-ai/web'
+        run: bunx turbo typecheck --filter='!@opencode-ai/web'
 
       - name: Run tests
         run: bun test || echo "Tests skipped or not configured"
 
       - name: Build
-        run: bun turbo build --filter='!@opencode-ai/web'
+        run: bunx turbo build --filter='!@opencode-ai/web'
+
