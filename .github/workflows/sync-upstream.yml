@@ -1,0 +1,187 @@
+name: Sync Upstream OpenCode
+
+on:
+  schedule:
+    # Run daily at 00:00 UTC
+    - cron: '0 0 * * *'
+  workflow_dispatch:
+    inputs:
+      force_sync:
+        description: 'Force sync even if no new version'
+        required: false
+        default: 'false'
+        type: boolean
+
+permissions:
+  contents: write
+  pull-requests: write
+
+env:
+  UPSTREAM_REPO: anomalyco/opencode
+  ANTIGRAVITY_VERSION_PREFIX: antigravity
+
+jobs:
+  check-upstream:
+    name: Check for New OpenCode Release
+    runs-on: ubuntu-latest
+    outputs:
+      new_version: ${{ steps.check.outputs.new_version }}
+      upstream_version: ${{ steps.check.outputs.upstream_version }}
+      should_sync: ${{ steps.check.outputs.should_sync }}
+    
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Get current version
+        id: current
+        run: |
+          CURRENT=$(node -p "require('./package.json').version" 2>/dev/null || echo "0.0.0")
+          # Extract base version (remove -antigravity suffix if present)
+          BASE_VERSION=$(echo "$CURRENT" | sed 's/-antigravity.*//')
+          echo "current_version=$CURRENT" >> "$GITHUB_OUTPUT"
+          echo "base_version=$BASE_VERSION" >> "$GITHUB_OUTPUT"
+          echo "Current version: $CURRENT (base: $BASE_VERSION)"
+
+      - name: Get upstream latest version
+        id: upstream
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          UPSTREAM_VERSION=$(gh release view --repo ${{ env.UPSTREAM_REPO }} --json tagName -q '.tagName' | sed 's/^v//')
+          echo "upstream_version=$UPSTREAM_VERSION" >> "$GITHUB_OUTPUT"
+          echo "Upstream version: $UPSTREAM_VERSION"
+
+      - name: Compare versions
+        id: check
+        run: |
+          CURRENT_BASE="${{ steps.current.outputs.base_version }}"
+          UPSTREAM="${{ steps.upstream.outputs.upstream_version }}"
+          FORCE="${{ github.event.inputs.force_sync }}"
+          
+          echo "Comparing: current base=$CURRENT_BASE vs upstream=$UPSTREAM"
+          
+          if [ "$FORCE" = "true" ]; then
+            echo "Force sync requested"
+            echo "should_sync=true" >> "$GITHUB_OUTPUT"
+          elif [ "$CURRENT_BASE" != "$UPSTREAM" ]; then
+            echo "New version detected!"
+            echo "should_sync=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "Already up to date"
+            echo "should_sync=false" >> "$GITHUB_OUTPUT"
+          fi
+          
+          echo "upstream_version=$UPSTREAM" >> "$GITHUB_OUTPUT"
+          echo "new_version=${UPSTREAM}-${{ env.ANTIGRAVITY_VERSION_PREFIX }}.1" >> "$GITHUB_OUTPUT"
+
+  sync-upstream:
+    name: Sync with Upstream
+    needs: check-upstream
+    if: needs.check-upstream.outputs.should_sync == 'true'
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Configure Git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Add upstream remote
+        run: |
+          git remote add upstream https://github.com/${{ env.UPSTREAM_REPO }}.git || true
+          git fetch upstream --tags
+
+      - name: Create sync branch
+        run: |
+          BRANCH="sync/opencode-v${{ needs.check-upstream.outputs.upstream_version }}"
+          git checkout -b "$BRANCH"
+          echo "SYNC_BRANCH=$BRANCH" >> "$GITHUB_ENV"
+
+      - name: Merge upstream
+        run: |
+          # Backup our workflows before merge
+          cp -r .github/workflows /tmp/our-workflows
+          
+          # Merge upstream dev branch (OpenCode uses dev as default)
+          # --allow-unrelated-histories handles initial sync when repos have different git roots
+          # -X ours keeps our changes in case of conflict
+          git merge upstream/dev --no-edit --allow-unrelated-histories -X ours || {
+            echo "Merge had conflicts, auto-resolved with 'ours' strategy"
+            git add .
+            git commit -m "Merge upstream v${{ needs.check-upstream.outputs.upstream_version }} (conflicts auto-resolved)"
+          }
+          
+          # Restore our workflows (don't use upstream's workflow files)
+          rm -rf .github/workflows
+          cp -r /tmp/our-workflows .github/workflows
+          git add .github/workflows
+          git commit -m "chore: preserve our GitHub Actions workflows" || true
+
+      - name: Apply Antigravity patches
+        run: |
+          # Apply custom Antigravity integration patches if they exist
+          if [ -d "patches" ]; then
+            for patch in patches/*.patch; do
+              if [ -f "$patch" ]; then
+                echo "Applying patch: $patch"
+                git apply "$patch" --3way || {
+                  echo "Warning: Patch $patch had conflicts, may need manual review"
+                }
+              fi
+            done
+          fi
+
+      - name: Update version
+        run: |
+          NEW_VERSION="${{ needs.check-upstream.outputs.new_version }}"
+          # Update root package.json version
+          node -e "
+            const fs = require('fs');
+            const pkg = JSON.parse(fs.readFileSync('package.json', 'utf8'));
+            pkg.version = '$NEW_VERSION';
+            fs.writeFileSync('package.json', JSON.stringify(pkg, null, 2) + '\n');
+          "
+          git add package.json
+          git commit -m "chore: bump version to $NEW_VERSION" || echo "No version change needed"
+
+      - name: Push sync branch
+        run: |
+          git push origin "$SYNC_BRANCH" --force
+
+      - name: Create Pull Request
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          NEW_VERSION="${{ needs.check-upstream.outputs.new_version }}"
+          UPSTREAM_VERSION="${{ needs.check-upstream.outputs.upstream_version }}"
+          
+          gh pr create \
+            --title "🔄 Sync upstream OpenCode v${UPSTREAM_VERSION}" \
+            --body "## Upstream Sync
+          
+          This PR syncs with upstream OpenCode release **v${UPSTREAM_VERSION}**.
+          
+          ### Changes
+          - Merged latest changes from [anomalyco/opencode](https://github.com/anomalyco/opencode)
+          - Applied Antigravity integration patches
+          - Updated version to \`${NEW_VERSION}\`
+          
+          ### Verification
+          - [ ] CI build passes
+          - [ ] Antigravity integration still works
+          - [ ] Built-in free models work correctly
+          
+          ---
+          *This PR was automatically created by the sync-upstream workflow.*" \
+            --base main \
+            --head "$SYNC_BRANCH" \
+            --label "upstream-sync" || echo "PR may already exist"
