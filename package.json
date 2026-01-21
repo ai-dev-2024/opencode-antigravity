@@ -97,5 +97,6 @@
   },
   "patchedDependencies": {
     "ghostty-web@0.3.0": "patches/ghostty-web@0.3.0.patch"
-  }
+  },
+  "version": "1.1.28-antigravity.1"
 }
