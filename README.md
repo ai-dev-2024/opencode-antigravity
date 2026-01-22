@@ -185,6 +185,33 @@ See the [`config-templates/`](./config-templates/) folder for ready-to-use confi
 | [OpenCode](https://github.com/anomalyco/opencode) | Open source AI coding agent (CLI + Desktop) |
 | [OpenCode Website](https://opencode.ai) | Official OpenCode documentation |
 
+## 🛡️ Antivirus Exclusions (Kaspersky/Windows Defender)
+
+OpenCode spawns child processes and opens local ports, which may trigger antivirus software. Add these exclusions:
+
+### Trusted Applications (Add both)
+
+| Application | Path |
+|-------------|------|
+| **OpenCode Desktop** | `C:\Users\YOUR_USERNAME\AppData\Local\OpenCode\OpenCode.exe` |
+| **Bun Runtime** | `C:\Users\YOUR_USERNAME\AppData\Local\OpenCode\bun.exe` |
+
+### Kaspersky Setup
+
+1. Open Kaspersky → Settings → Security Settings
+2. Threats and Exclusions → Specify trusted applications
+3. Add → Browse to `OpenCode.exe` and `bun.exe`
+4. Enable all options:
+   - Allow interaction with OS
+   - Do not monitor application activity
+   - Do not restrict application activity
+   - Do not scan network traffic
+5. Save and restart Kaspersky
+
+### Optional: Network Trust
+
+Add `127.0.0.1` and `localhost` to trusted addresses (Settings → Network Settings → Trusted addresses).
+
 ## ☕ Support
 
 If this project helps you, consider supporting development:
