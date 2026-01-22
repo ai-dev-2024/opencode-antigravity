@@ -133,6 +133,38 @@ Run `/models` in OpenCode and select any Antigravity model!
 | `antigravity/claude-opus-4-5-thinking` | Claude Opus with extended thinking |
 | `antigravity/gpt-oss-120b-medium` | GPT-OSS 120B model |
 
+## ⚙️ Important: Persistent Settings
+
+These settings ensure proper routing **persists across updates** to OpenCode, Claude CLI, and Antigravity Manager:
+
+### Environment Variable (Required)
+
+Set this **once** at the User level - it persists across all app updates:
+
+**Windows (PowerShell as Admin):**
+```powershell
+[System.Environment]::SetEnvironmentVariable('OPENCODE_DISABLE_CLAUDE_CODE_PROMPT', '1', 'User')
+```
+
+**Linux/macOS:**
+```bash
+echo 'export OPENCODE_DISABLE_CLAUDE_CODE_PROMPT=1' >> ~/.bashrc
+source ~/.bashrc
+```
+
+**Why?** OpenCode normally reads `~/.claude/CLAUDE.md` for Claude CLI compatibility. This env var disables that, allowing:
+- **Claude CLI** → Uses `~/.claude/CLAUDE.md` with Antigravity proxy ✅
+- **OpenCode** → Ignores that file, free models work directly ✅
+
+### What Persists Across Updates
+
+| Component | Persists? | Location |
+|-----------|-----------|----------|
+| Environment variable | ✅ Yes | System User environment |
+| OpenCode config | ✅ Yes | `~/.config/opencode/opencode.json` |
+| Claude CLAUDE.md | ✅ Yes | `~/.claude/CLAUDE.md` |
+| Antigravity accounts | ✅ Yes | Antigravity Manager data |
+
 ## 💡 Features
 
 - ✅ **Combined Quota** - Use all accounts' quota from Antigravity Manager
