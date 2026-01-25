@@ -1,0 +1,6 @@
+{
+    "model": "gemini-3-pro-high",
+    "env": {
+        "ANTHROPIC_MODEL": "gemini-3-pro-high"
+    }
+}

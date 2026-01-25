@@ -64,8 +64,8 @@ export namespace Provider {
     "@gitlab/gitlab-ai-provider": createGitLab,
     // @ts-ignore (TODO: kill this code so we dont have to maintain it)
     "@ai-sdk/github-copilot": createGitHubCopilotOpenAICompatible,
-    // Antigravity Manager - uses Anthropic SDK with custom baseURL
-    "@ai-sdk/antigravity-manager": createAnthropic,
+    // Antigravity Manager - uses OpenAI-compatible SDK to route through local proxy
+    "@ai-sdk/antigravity-manager": createOpenAICompatible,
   }
 
   type CustomModelLoader = (sdk: any, modelID: string, options?: Record<string, any>) => Promise<any>
@@ -500,45 +500,14 @@ export namespace Provider {
         },
       }
     },
-    // Antigravity Manager integration - uses combined quota from multiple accounts
+    // Antigravity Manager integration - routes through local proxy for combined quota
     "antigravity-manager": async () => {
       return {
         autoload: true,
         options: {
-          baseURL: "http://127.0.0.1:8888",
-          apiKey: "antigravity-proxy",
-          headers: {
-            "anthropic-beta": "claude-code-20250219,interleaved-thinking-2025-05-14",
-          },
-          // Custom fetch to ensure messages are properly formatted
-          fetch: async (input: RequestInfo | URL, init?: RequestInit) => {
-            if (init?.body && init.method === "POST") {
-              try {
-                const body = JSON.parse(init.body as string)
-                // Ensure messages have proper content formatting
-                if (body.messages && Array.isArray(body.messages)) {
-                  body.messages = body.messages.map((msg: any) => {
-                    if (typeof msg.content === "string" && msg.content.trim() === "") {
-                      return { ...msg, content: " " } // Ensure non-empty content
-                    }
-                    if (Array.isArray(msg.content)) {
-                      msg.content = msg.content.map((part: any) => {
-                        if (part.type === "text" && (!part.text || part.text.trim() === "")) {
-                          return { ...part, text: " " }
-                        }
-                        return part
-                      })
-                    }
-                    return msg
-                  })
-                }
-                init = { ...init, body: JSON.stringify(body) }
-              } catch (e) {
-                // Continue with original request if parsing fails
-              }
-            }
-            return fetch(input, init)
-          },
+          baseURL: "http://127.0.0.1:8888/v1",
+          apiKey: "sk-antigravity",  // Antigravity Manager accepts any key when auth is disabled
+          name: "antigravity-manager",
         },
       }
     },
@@ -747,6 +716,110 @@ export namespace Provider {
         })),
       }
     }
+
+    // Add Antigravity Manager provider with built-in models
+    // Routes through local proxy at port 8888 for combined quota management
+    const antigravityModels: Record<string, Model> = {}
+    const createAntigravityModel = (id: string, name: string, family: string, reasoning: boolean = false): Model => ({
+      id,
+      name,
+      family,
+      providerID: "antigravity-manager",
+      api: {
+        id,
+        url: "http://127.0.0.1:8888/v1",
+        npm: "@ai-sdk/openai-compatible",
+      },
+      status: "active",
+      capabilities: {
+        temperature: true,
+        reasoning,
+        attachment: true,
+        toolcall: true,
+        input: { text: true, audio: false, image: true, video: false, pdf: true },
+        output: { text: true, audio: false, image: false, video: false, pdf: false },
+        interleaved: reasoning,
+      },
+      cost: { input: 0, output: 0, cache: { read: 0, write: 0 } },
+      limit: { context: 200000, output: 16384 },
+      options: {},
+      headers: {},
+      release_date: "2025-01-01",
+    })
+
+    // Claude models via Antigravity
+    antigravityModels["claude-opus-4-5-thinking"] = createAntigravityModel(
+      "claude-opus-4-5-thinking",
+      "Claude Opus 4.5 Thinking (Antigravity)",
+      "claude",
+      true
+    )
+    antigravityModels["claude-sonnet-4-5-thinking"] = createAntigravityModel(
+      "claude-sonnet-4-5-thinking",
+      "Claude Sonnet 4.5 Thinking (Antigravity)",
+      "claude",
+      true
+    )
+    antigravityModels["claude-sonnet-4-5"] = createAntigravityModel(
+      "claude-sonnet-4-5",
+      "Claude Sonnet 4.5 (Antigravity)",
+      "claude",
+      false
+    )
+
+    // Gemini 3 models via Antigravity
+    antigravityModels["gemini-3-pro-high"] = createAntigravityModel(
+      "gemini-3-pro-high",
+      "Gemini 3 Pro High (Antigravity)",
+      "gemini",
+      true
+    )
+    antigravityModels["gemini-3-pro-low"] = createAntigravityModel(
+      "gemini-3-pro-low",
+      "Gemini 3 Pro Low (Antigravity)",
+      "gemini",
+      false
+    )
+    antigravityModels["gemini-3-flash"] = createAntigravityModel(
+      "gemini-3-flash",
+      "Gemini 3 Flash (Antigravity)",
+      "gemini",
+      true
+    )
+    antigravityModels["gemini-3-flash-medium"] = createAntigravityModel(
+      "gemini-3-flash-medium",
+      "Gemini 3 Flash Medium (Antigravity)",
+      "gemini",
+      true
+    )
+    antigravityModels["gemini-3-flash-high"] = createAntigravityModel(
+      "gemini-3-flash-high",
+      "Gemini 3 Flash High (Antigravity)",
+      "gemini",
+      true
+    )
+
+    // Gemini 2.5 models via Antigravity
+    antigravityModels["gemini-2.5-flash"] = createAntigravityModel(
+      "gemini-2.5-flash",
+      "Gemini 2.5 Flash (Antigravity)",
+      "gemini",
+      true
+    )
+    antigravityModels["gemini-2.5-pro"] = createAntigravityModel(
+      "gemini-2.5-pro",
+      "Gemini 2.5 Pro (Antigravity)",
+      "gemini",
+      true
+    )
+
+    database["antigravity-manager"] = {
+      id: "antigravity-manager",
+      name: "Antigravity Manager",
+      env: [],
+      models: antigravityModels,
+    }
+
 
     function mergeProvider(providerID: string, provider: Partial<Info>) {
       const existing = providers[providerID]
