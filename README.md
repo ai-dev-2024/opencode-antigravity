@@ -19,24 +19,17 @@ This project provides a seamless, **plug-in free** configuration to integrate **
 
 ## 🏗️ Architecture
 
-```mermaid
-graph LR
-    subgraph "Your Machine"
-        A[OpenCode Desktop] -->|HTTP Request| B(Antigravity Manager :8888)
-        C[OpenCode CLI] -->|HTTP Request| B
-    end
-    
-    subgraph "Cloud / Antigravity"
-        B -->|Load Balancing| D{Account Pool}
-        D -->|Account 1| E[Google API]
-        D -->|Account 2| E
-        D -->|Account 3| E
-        D -->|Account 4| E
-    end
-    
-    style A fill:#2e2e2e,stroke:#fff,color:#fff
-    style B fill:#61dafb,stroke:#333,color:#000
-    style D fill:#ff00ea,stroke:#333,color:#fff
+```text
++------------------+         +---------------------------+         +-------------------+
+|                  |         |                           |         |                   |
+| OpenCode Desktop | ------> |                           | ------> |     Account 1     |
+|                  |         |    Antigravity Manager    |         |                   |
++------------------+         |        (Port 8888)        |         +-------------------+
+                             |                           |
++------------------+         |     [ PRO / FLASH ]       |         +-------------------+
+|                  | ------> |                           | ------> |     Account 2     |
+|   OpenCode CLI   |         |    [ Token Rotation ]     |         |                   |
++------------------+         +---------------------------+         +-------------------+
 ```
 
 ---
