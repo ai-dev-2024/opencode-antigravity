@@ -1,6 +1,6 @@
 {
   "name": "opencode-antigravity-integration",
-  "version": "1.0.0",
+  "version": "1.1.36-antigravity.1",
   "description": "Plug-in free integration for OpenCode and Antigravity Manager",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
