@@ -5,6 +5,26 @@ All notable changes to the OpenCode + Antigravity Integration project will be do
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.2.0] - 2026-01-31
+
+### Added
+- **Windows Terminal Fix**: Automated workaround for Ctrl+V image paste on Windows.
+  - Windows Terminal intercepts Ctrl+V by default, preventing image paste
+  - Solution: Rebind terminal paste to `Ctrl+Shift+V`
+  - Ctrl+V now correctly passes through to OpenCode for image paste
+- **Caffeine Theme**: Modern dark theme with warm brown/cream color palette
+- **SVG Icons**: Replaced emoji icons with proper vector graphics
+- **Prominent Ko-Fi Support**: Dedicated support section on landing page
+
+### Fixed
+- Documented Windows Terminal Ctrl+V interception issue and solution
+- Verified clipboard image paste works with OpenCode v1.1.47+
+
+### Improved
+- Enhanced Vercel landing page with glassmorphism design
+- Better GitHub README with showcase table and badges
+- Added troubleshooting section for clipboard issues
+
 ## [1.1.0] - 2026-01-31
 
 ### Added

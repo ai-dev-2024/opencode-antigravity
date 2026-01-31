@@ -11,7 +11,7 @@
 
 <br>
 
-[![Version](https://img.shields.io/badge/Version-1.1.0-1a1614?style=flat-square)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/Version-1.2.0-1a1614?style=flat-square)](CHANGELOG.md)
 [![License](https://img.shields.io/badge/License-MIT-1a1614?style=flat-square)](LICENSE)
 [![GitHub Stars](https://img.shields.io/github/stars/ai-dev-2024/opencode-antigravity?style=flat-square&color=e8d5b7)](https://github.com/ai-dev-2024/opencode-antigravity)
 
@@ -52,6 +52,22 @@ cd opencode-antigravity
 ```
 
 Then **restart OpenCode** and select the Antigravity provider.
+
+---
+
+## 📋 Clipboard Image Paste (Windows Fix)
+
+OpenCode v1.1.47+ supports clipboard image paste, but **Windows Terminal intercepts Ctrl+V** by default.
+
+### Quick Fix:
+
+1. Open **Windows Terminal Settings** (`Ctrl+,`)
+2. Go to **Actions** → Find **Paste** (bound to `Ctrl+V`)
+3. Change it to `Ctrl+Shift+V`
+4. **Restart terminal** and run `opencode`
+5. Now **Ctrl+V** will paste images!
+
+> **Tip**: After this change, use `Ctrl+Shift+V` for regular text paste in terminal.
 
 ---
 
