@@ -5,26 +5,30 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>OpenCode + Antigravity | Infinite AI Quota</title>
+    <meta name="description"
+        content="Unlock unlimited AI quota in OpenCode with Antigravity Manager integration. Clipboard image paste, zero config, privacy-first.">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link
-        href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap"
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
         rel="stylesheet">
     <style>
+        /* Caffeine Theme - Dark Mode */
         :root {
-            --primary: #6366f1;
-            --primary-glow: rgba(99, 102, 241, 0.4);
-            --secondary: #a855f7;
-            --secondary-glow: rgba(168, 85, 247, 0.4);
-            --accent: #ec4899;
-            --bg-dark: #030014;
-            --bg-card: rgba(30, 41, 59, 0.4);
-            --bg-card-hover: rgba(30, 41, 59, 0.6);
-            --text-main: #f8fafc;
-            --text-muted: #94a3b8;
-            --border: rgba(255, 255, 255, 0.1);
-            --border-hover: rgba(255, 255, 255, 0.2);
-            --glass: cubic-bezier(0.25, 0.1, 0.25, 1);
+            --background: #1a1614;
+            --foreground: #f5f2ef;
+            --card: #252220;
+            --card-foreground: #f5f2ef;
+            --primary: #e8d5b7;
+            --primary-foreground: #1a1614;
+            --secondary: #3d3530;
+            --secondary-foreground: #e8d5b7;
+            --muted: #2f2a27;
+            --muted-foreground: #a39d97;
+            --accent: #352f2b;
+            --border: #3a3430;
+            --ring: #e8d5b7;
+            --radius: 0.5rem;
+            --shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
         }
 
         * {
@@ -34,529 +38,588 @@
         }
 
         body {
-            font-family: 'Outfit', sans-serif;
-            background-color: var(--bg-dark);
-            color: var(--text-main);
-            overflow-x: hidden;
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            background-color: var(--background);
+            color: var(--foreground);
             line-height: 1.6;
-            background-image:
-                radial-gradient(circle at 10% 20%, rgba(99, 102, 241, 0.15) 0%, transparent 40%),
-                radial-gradient(circle at 90% 80%, rgba(168, 85, 247, 0.15) 0%, transparent 40%);
-        }
-
-        /* Ambient Background */
-        .ambient-light {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
-            pointer-events: none;
-            z-index: -1;
-            background: radial-gradient(circle at 50% -20%, var(--primary-glow), transparent 60%);
-            opacity: 0.6;
+            overflow-x: hidden;
         }
 
         /* Navigation */
         nav {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 1.5rem 5%;
             position: fixed;
             top: 0;
             width: 100%;
             z-index: 100;
-            backdrop-filter: blur(16px);
-            background: rgba(3, 0, 20, 0.5);
+            background: rgba(26, 22, 20, 0.85);
+            backdrop-filter: blur(12px);
             border-bottom: 1px solid var(--border);
+            padding: 1rem 5%;
+        }
+
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
 
         .logo {
-            font-weight: 800;
-            font-size: 1.5rem;
-            background: linear-gradient(135deg, #fff 0%, #cbd5e1 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
+            font-weight: 700;
+            font-size: 1.25rem;
+            color: var(--primary);
             display: flex;
             align-items: center;
-            gap: 0.5rem;
+            gap: 0.75rem;
         }
 
-        .version-badge {
-            font-size: 0.75rem;
-            background: rgba(255, 255, 255, 0.1);
+        .logo svg {
+            width: 28px;
+            height: 28px;
+        }
+
+        .version {
+            font-size: 0.7rem;
+            background: var(--secondary);
             padding: 0.2rem 0.5rem;
             border-radius: 999px;
-            color: var(--text-muted);
-            border: 1px solid var(--border);
+            color: var(--muted-foreground);
             font-weight: 500;
         }
 
         .nav-links {
             display: flex;
-            gap: 2rem;
+            gap: 1.5rem;
             align-items: center;
         }
 
         .nav-links a {
-            color: var(--text-muted);
+            color: var(--muted-foreground);
             text-decoration: none;
             font-weight: 500;
-            transition: all 0.3s var(--glass);
-            font-size: 0.95rem;
+            font-size: 0.9rem;
+            transition: color 0.2s;
         }
 
         .nav-links a:hover {
-            color: #fff;
+            color: var(--foreground);
         }
 
-        .nav-btn {
-            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
-            color: white !important;
-            padding: 0.6rem 1.25rem;
-            border-radius: 999px;
+        .nav-cta {
+            background: var(--primary);
+            color: var(--primary-foreground) !important;
+            padding: 0.5rem 1rem;
+            border-radius: var(--radius);
             font-weight: 600 !important;
-            box-shadow: 0 4px 20px rgba(99, 102, 241, 0.4);
-            transition: transform 0.2s, box-shadow 0.2s !important;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            transition: transform 0.2s, box-shadow 0.2s;
         }
 
-        .nav-btn:hover {
+        .nav-cta:hover {
             transform: translateY(-1px);
-            box-shadow: 0 6px 25px rgba(99, 102, 241, 0.5);
+            box-shadow: 0 4px 12px rgba(232, 213, 183, 0.3);
+        }
+
+        .nav-cta svg {
+            width: 16px;
+            height: 16px;
         }
 
         /* Hero Section */
         .hero {
             padding: 10rem 5% 6rem;
-            text-align: center;
-            position: relative;
-            max-width: 1200px;
+            max-width: 1000px;
             margin: 0 auto;
+            text-align: center;
         }
 
-        .hero-badge {
+        .badge {
             display: inline-flex;
             align-items: center;
             gap: 0.5rem;
-            background: rgba(99, 102, 241, 0.1);
-            border: 1px solid rgba(99, 102, 241, 0.3);
-            color: #a5b4fc;
-            padding: 0.5rem 1rem;
+            background: var(--secondary);
+            border: 1px solid var(--border);
+            padding: 0.4rem 0.9rem;
             border-radius: 999px;
-            font-size: 0.9rem;
+            font-size: 0.85rem;
+            color: var(--muted-foreground);
             margin-bottom: 2rem;
-            backdrop-filter: blur(8px);
-            animation: fadeInDown 0.8s ease-out;
+        }
+
+        .badge-dot {
+            width: 8px;
+            height: 8px;
+            background: #4ade80;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.5;
+            }
         }
 
         h1 {
-            font-size: clamp(3rem, 6vw, 5rem);
-            line-height: 1.1;
+            font-size: clamp(2.5rem, 5vw, 4rem);
             font-weight: 800;
+            line-height: 1.1;
             margin-bottom: 1.5rem;
             letter-spacing: -0.02em;
-            animation: fadeInUp 0.8s ease-out 0.2s backwards;
         }
 
-        h1 span {
-            background: linear-gradient(135deg, #fff 30%, #94a3b8 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-
-        .gradient-text {
-            background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 50%, var(--secondary) 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            position: relative;
+        .highlight {
+            color: var(--primary);
         }
 
         .hero p {
-            font-size: 1.25rem;
-            color: var(--text-muted);
+            font-size: 1.15rem;
+            color: var(--muted-foreground);
             max-width: 600px;
-            margin: 0 auto 3rem;
-            animation: fadeInUp 0.8s ease-out 0.4s backwards;
+            margin: 0 auto 2.5rem;
         }
 
         .cta-group {
             display: flex;
             gap: 1rem;
             justify-content: center;
-            animation: fadeInUp 0.8s ease-out 0.6s backwards;
+            flex-wrap: wrap;
         }
 
         .btn {
             display: inline-flex;
             align-items: center;
             gap: 0.5rem;
-            padding: 0.9rem 2rem;
-            border-radius: 12px;
+            padding: 0.85rem 1.75rem;
+            border-radius: var(--radius);
             text-decoration: none;
             font-weight: 600;
-            transition: all 0.3s var(--glass);
-            font-size: 1.1rem;
+            font-size: 1rem;
+            transition: all 0.2s;
+        }
+
+        .btn svg {
+            width: 18px;
+            height: 18px;
         }
 
         .btn-primary {
-            background: #fff;
-            color: #000;
-            box-shadow: 0 0 20px rgba(255, 255, 255, 0.1);
+            background: var(--primary);
+            color: var(--primary-foreground);
         }
 
         .btn-primary:hover {
             transform: translateY(-2px);
-            box-shadow: 0 0 30px rgba(255, 255, 255, 0.2);
+            box-shadow: 0 6px 20px rgba(232, 213, 183, 0.25);
         }
 
         .btn-secondary {
-            background: rgba(255, 255, 255, 0.05);
-            color: #fff;
+            background: var(--card);
+            color: var(--foreground);
             border: 1px solid var(--border);
-            backdrop-filter: blur(10px);
         }
 
         .btn-secondary:hover {
-            background: rgba(255, 255, 255, 0.1);
-            border-color: rgba(255, 255, 255, 0.3);
+            background: var(--accent);
+            border-color: var(--primary);
         }
 
-        /* Showcase Interface */
-        .showcase {
+        /* Terminal Preview */
+        .terminal {
+            max-width: 700px;
             margin: 4rem auto 0;
-            max-width: 1000px;
-            background: rgba(15, 23, 42, 0.6);
-            border-radius: 20px;
+            background: var(--card);
             border: 1px solid var(--border);
-            padding: 1rem;
-            box-shadow: 0 20px 50px -10px rgba(0, 0, 0, 0.5);
-            animation: fadeInUp 1s ease-out 0.8s backwards;
-            position: relative;
+            border-radius: 12px;
             overflow: hidden;
+            box-shadow: var(--shadow);
         }
 
-        .showcase-header {
+        .terminal-header {
             display: flex;
+            align-items: center;
             gap: 0.5rem;
-            margin-bottom: 1rem;
-            padding-left: 0.5rem;
+            padding: 0.75rem 1rem;
+            background: var(--secondary);
+            border-bottom: 1px solid var(--border);
         }
 
-        .dot {
+        .terminal-dot {
             width: 12px;
             height: 12px;
             border-radius: 50%;
         }
 
-        .showcase-content {
-            background: #0f172a;
-            border-radius: 12px;
-            padding: 2rem;
-            font-family: 'JetBrains Mono', monospace;
-            text-align: left;
-            position: relative;
+        .terminal-body {
+            padding: 1.5rem;
+            font-family: 'SF Mono', 'Fira Code', monospace;
+            font-size: 0.9rem;
+            line-height: 1.8;
         }
 
-        .code-typing {
-            color: #e2e8f0;
-            white-space: pre-wrap;
+        .terminal-line {
+            display: flex;
+            gap: 0.5rem;
         }
 
-        .token-keyword {
-            color: #c678dd;
+        .terminal-prompt {
+            color: var(--primary);
         }
 
-        .token-string {
-            color: #98c379;
+        .terminal-cmd {
+            color: var(--foreground);
         }
 
-        .token-comment {
-            color: #5c6370;
+        .terminal-comment {
+            color: var(--muted-foreground);
         }
 
-        .token-func {
-            color: #61afef;
-        }
-
-        /* Features Grid */
+        /* Features Section */
         .features {
-            padding: 8rem 5%;
+            padding: 6rem 5%;
             max-width: 1200px;
             margin: 0 auto;
         }
 
         .section-header {
             text-align: center;
-            margin-bottom: 5rem;
+            margin-bottom: 4rem;
         }
 
         .section-header h2 {
-            font-size: 2.5rem;
-            margin-bottom: 1rem;
+            font-size: 2rem;
             font-weight: 700;
+            margin-bottom: 0.75rem;
         }
 
-        .grid {
+        .section-header p {
+            color: var(--muted-foreground);
+            font-size: 1.1rem;
+        }
+
+        .features-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 2rem;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
         }
 
-        .card {
-            background: var(--bg-card);
+        .feature-card {
+            background: var(--card);
             border: 1px solid var(--border);
-            padding: 2.5rem;
-            border-radius: 24px;
-            transition: all 0.4s var(--glass);
-            position: relative;
-            overflow: hidden;
+            border-radius: 12px;
+            padding: 2rem;
+            transition: all 0.3s;
         }
 
-        .card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(135deg, rgba(255, 255, 255, 0.03) 0%, transparent 100%);
-            opacity: 0;
-            transition: opacity 0.4s;
+        .feature-card:hover {
+            border-color: var(--primary);
+            transform: translateY(-4px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
         }
 
-        .card:hover {
-            transform: translateY(-5px);
-            border-color: var(--primary-glow);
-            box-shadow: 0 10px 40px -10px rgba(99, 102, 241, 0.2);
-        }
-
-        .card:hover::before {
-            opacity: 1;
-        }
-
-        .icon-box {
-            width: 56px;
-            height: 56px;
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 16px;
+        .feature-icon {
+            width: 48px;
+            height: 48px;
+            background: var(--secondary);
+            border-radius: 10px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 1.75rem;
-            margin-bottom: 1.5rem;
-            border: 1px solid var(--border);
+            margin-bottom: 1.25rem;
         }
 
-        .card h3 {
-            font-size: 1.35rem;
-            margin-bottom: 0.75rem;
+        .feature-icon svg {
+            width: 24px;
+            height: 24px;
+            color: var(--primary);
+        }
+
+        .feature-card h3 {
+            font-size: 1.15rem;
             font-weight: 600;
+            margin-bottom: 0.5rem;
         }
 
-        .card p {
-            color: var(--text-muted);
-            font-size: 1rem;
-            line-height: 1.7;
+        .feature-card p {
+            color: var(--muted-foreground);
+            font-size: 0.95rem;
+        }
+
+        /* Support Section */
+        .support {
+            padding: 5rem 5%;
+            text-align: center;
+            background: linear-gradient(180deg, transparent 0%, var(--secondary) 100%);
+        }
+
+        .support-card {
+            max-width: 500px;
+            margin: 0 auto;
+            background: var(--card);
+            border: 2px solid var(--primary);
+            border-radius: 16px;
+            padding: 3rem 2rem;
+            box-shadow: 0 0 40px rgba(232, 213, 183, 0.1);
+        }
+
+        .support-card h2 {
+            font-size: 1.75rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .support-card p {
+            color: var(--muted-foreground);
+            margin-bottom: 1.5rem;
+        }
+
+        .kofi-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: #ff5e5b;
+            color: white;
+            padding: 1rem 2rem;
+            border-radius: var(--radius);
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 1.1rem;
+            transition: all 0.2s;
+        }
+
+        .kofi-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(255, 94, 91, 0.4);
+        }
+
+        .kofi-btn svg {
+            width: 20px;
+            height: 20px;
         }
 
         /* Footer */
         footer {
+            padding: 3rem 5%;
             border-top: 1px solid var(--border);
-            padding: 4rem 5%;
-            margin-top: 4rem;
-            background: rgba(0, 0, 0, 0.2);
-        }
-
-        .footer-content {
-            max-width: 1200px;
-            margin: 0 auto;
             text-align: center;
-        }
-
-        .footer-logo {
-            font-weight: 800;
-            font-size: 1.25rem;
-            margin-bottom: 1.5rem;
-            display: inline-block;
         }
 
         .footer-links {
             display: flex;
             justify-content: center;
             gap: 2rem;
-            margin-bottom: 2rem;
+            margin-bottom: 1.5rem;
             flex-wrap: wrap;
         }
 
         .footer-links a {
-            color: var(--text-muted);
+            color: var(--muted-foreground);
             text-decoration: none;
-            transition: color 0.3s;
+            font-size: 0.9rem;
+            transition: color 0.2s;
         }
 
         .footer-links a:hover {
-            color: #fff;
+            color: var(--primary);
         }
 
-        /* Animations */
-        @keyframes fadeInUp {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+        .copyright {
+            color: var(--muted-foreground);
+            font-size: 0.85rem;
         }
 
-        @keyframes fadeInDown {
-            from {
-                opacity: 0;
-                transform: translateY(-20px);
-            }
-
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
+        /* Responsive */
         @media (max-width: 768px) {
             .nav-links {
                 display: none;
             }
 
             h1 {
-                font-size: 3rem;
+                font-size: 2.25rem;
+            }
+
+            .terminal {
+                margin: 3rem 1rem 0;
             }
         }
     </style>
 </head>
 
 <body>
-    <div class="ambient-light"></div>
-
     <nav>
-        <div class="logo">
-            OpenCode <span style="opacity: 0.5; font-weight: 300;">+</span> Antigravity
-            <span class="version-badge">v1.1.0</span>
-        </div>
-        <div class="nav-links">
-            <a href="#features">Features</a>
-            <a href="https://github.com/ai-dev-2024/opencode-antigravity" target="_blank">GitHub</a>
-            <a href="https://ko-fi.com/ai_dev_2024" target="_blank" class="nav-btn">☕ Support Project</a>
+        <div class="nav-container">
+            <div class="logo">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
+                </svg>
+                OpenCode + Antigravity
+                <span class="version">v1.1.0</span>
+            </div>
+            <div class="nav-links">
+                <a href="#features">Features</a>
+                <a href="https://github.com/ai-dev-2024/opencode-antigravity" target="_blank">GitHub</a>
+                <a href="https://ko-fi.com/ai_dev_2024" target="_blank" class="nav-cta">
+                    <svg viewBox="0 0 24 24" fill="currentColor">
+                        <path
+                            d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
+                    </svg>
+                    Support
+                </a>
+            </div>
         </div>
     </nav>
 
-    <section class="hero">
-        <div class="hero-badge">
-            <span style="color: #4ade80;">●</span> New: Clipboard Image Paste Support
-        </div>
-        <h1>
-            Infinite Quota for<br>
-            <span class="gradient-text">AI-Powered Coding</span>
-        </h1>
-        <p>
-            Seamlessly integrate OpenCode with Antigravity Manager. Access Claude, Gemini, and GPT models with unlimited
-            quota through your pooled accounts.
-        </p>
-        <div class="cta-group">
-            <a href="#features" class="btn btn-primary">
-                <span>🚀</span> Get Started
-            </a>
-            <a href="https://github.com/ai-dev-2024/opencode-antigravity" target="_blank" class="btn btn-secondary">
-                <span>⭐</span> Star on GitHub
-            </a>
-        </div>
-
-        <div class="showcase">
-            <div class="showcase-header">
-                <div class="dot" style="background: #ef4444;"></div>
-                <div class="dot" style="background: #eab308;"></div>
-                <div class="dot" style="background: #22c55e;"></div>
+    <main>
+        <section class="hero">
+            <div class="badge">
+                <span class="badge-dot"></span>
+                New: Clipboard Image Paste Support
             </div>
-            <div class="showcase-content">
-                <div class="code-typing">
-                    <span class="token-comment">// Paste an image directly into your code editor</span>
-                    <span class="token-keyword">const</span> <span class="token-func">analyzeScreenshot</span> = <span
-                        class="token-keyword">async</span> () => {
-                    <span class="token-comment">// Just press Ctrl+V - Works on Windows, Mac, & Linux!</span>
-                    <span class="token-keyword">const</span> image = <span class="token-keyword">await</span>
-                    clipboard.<span class="token-func">readImage</span>();
+            <h1>
+                Infinite Quota for<br>
+                <span class="highlight">AI-Powered Coding</span>
+            </h1>
+            <p>
+                Seamlessly integrate OpenCode with Antigravity Manager. Access Claude, Gemini, and GPT models with
+                unlimited quota through pooled accounts.
+            </p>
+            <div class="cta-group">
+                <a href="https://github.com/ai-dev-2024/opencode-antigravity#-one-click-installation-windows"
+                    class="btn btn-primary">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                    </svg>
+                    Get Started
+                </a>
+                <a href="https://github.com/ai-dev-2024/opencode-antigravity" target="_blank" class="btn btn-secondary">
+                    <svg viewBox="0 0 24 24" fill="currentColor">
+                        <path
+                            d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z" />
+                    </svg>
+                    Star on GitHub
+                </a>
+            </div>
 
-                    <span class="token-keyword">return</span> <span class="token-func">askAI</span>({
-                    model: <span class="token-string">"claude-3-5-sonnet"</span>, <span class="token-comment">// Routing
-                        via Antigravity</span>
-                    image: image,
-                    prompt: <span class="token-string">"Explain this UI layout"</span>
-                    });
-                    }
+            <div class="terminal">
+                <div class="terminal-header">
+                    <div class="terminal-dot" style="background: #ff5f56;"></div>
+                    <div class="terminal-dot" style="background: #ffbd2e;"></div>
+                    <div class="terminal-dot" style="background: #27c93f;"></div>
+                </div>
+                <div class="terminal-body">
+                    <div class="terminal-line">
+                        <span class="terminal-prompt">$</span>
+                        <span class="terminal-cmd">git clone
+                            https://github.com/ai-dev-2024/opencode-antigravity.git</span>
+                    </div>
+                    <div class="terminal-line">
+                        <span class="terminal-prompt">$</span>
+                        <span class="terminal-cmd">cd opencode-antigravity && ./release/install.ps1</span>
+                    </div>
+                    <div class="terminal-line">
+                        <span class="terminal-comment"># ✓ Configuration installed! Restart OpenCode.</span>
+                    </div>
                 </div>
             </div>
-        </div>
-    </section>
+        </section>
 
-    <section class="features" id="features">
-        <div class="section-header">
-            <h2>Supercharged Capabilities</h2>
-            <p style="color: var(--text-muted); font-size: 1.1rem;">Everything you need for a seamless AI experience</p>
-        </div>
+        <section class="features" id="features">
+            <div class="section-header">
+                <h2>Supercharged Features</h2>
+                <p>Everything you need for unlimited AI-powered development</p>
+            </div>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path
+                                d="M12 2v4m0 12v4M4.93 4.93l2.83 2.83m8.48 8.48l2.83 2.83M2 12h4m12 0h4M4.93 19.07l2.83-2.83m8.48-8.48l2.83-2.83" />
+                        </svg>
+                    </div>
+                    <h3>Infinite Quota</h3>
+                    <p>Rotate through pooled Google/Claude accounts managed by Antigravity. Never hit rate limits.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <rect x="8" y="2" width="8" height="4" rx="1" />
+                            <path d="M16 4h2a2 2 0 012 2v14a2 2 0 01-2 2H6a2 2 0 01-2-2V6a2 2 0 012-2h2" />
+                            <path d="M12 11v6m-3-3h6" />
+                        </svg>
+                    </div>
+                    <h3>Clipboard Image Paste</h3>
+                    <p>Press Ctrl+V to paste screenshots directly. Works on Windows, macOS, and Linux.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M5 12h14M12 5l7 7-7 7" />
+                        </svg>
+                    </div>
+                    <h3>Zero Configuration</h3>
+                    <p>Pre-mapped model IDs for Gemini, Claude, and GPT. Just install and go.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" />
+                        </svg>
+                    </div>
+                    <h3>Zero Latency</h3>
+                    <p>Direct HTTP to your local proxy. No cloud round-trips, just instant responses.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+                        </svg>
+                    </div>
+                    <h3>Privacy First</h3>
+                    <p>All processing happens locally. Your code never leaves your machine.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="12" r="10" />
+                            <path d="M8 14s1.5 2 4 2 4-2 4-2M9 9h.01M15 9h.01" />
+                        </svg>
+                    </div>
+                    <h3>Free Models Included</h3>
+                    <p>OpenCode's built-in free models continue working. Best of both worlds.</p>
+                </div>
+            </div>
+        </section>
 
-        <div class="grid">
-            <div class="card">
-                <div class="icon-box" style="color: #a855f7;">♾️</div>
-                <h3>Infinite Quota</h3>
-                <p>Automatically rotate through your Google/Claude accounts managed by Antigravity Manager. Never hit
-                    rate limits again.</p>
+        <section class="support" id="support">
+            <div class="support-card">
+                <h2>Support Development</h2>
+                <p>If this integration saves you time and money, consider buying me a coffee!</p>
+                <a href="https://ko-fi.com/ai_dev_2024" target="_blank" class="kofi-btn">
+                    <svg viewBox="0 0 24 24" fill="currentColor">
+                        <path
+                            d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
+                    </svg>
+                    Support on Ko-Fi
+                </a>
             </div>
-            <div class="card">
-                <div class="icon-box" style="color: #ec4899;">📋</div>
-                <h3>Clipboard & Vision</h3>
-                <p>Paste screenshots directly with Ctrl+V. Enhanced vision support works natively across all platforms.
-                </p>
-            </div>
-            <div class="card">
-                <div class="icon-box" style="color: #3b82f6;">🔌</div>
-                <h3>Plug-in Free</h3>
-                <p>No complex npm packages or risky plugins. Just pure, native configuration that works out of the box.
-                </p>
-            </div>
-            <div class="card">
-                <div class="icon-box" style="color: #10b981;">⚡</div>
-                <h3>Zero Latency</h3>
-                <p>Direct HTTP connection to your local Manager proxy (Port 8888). Your code never leaves your local
-                    network.</p>
-            </div>
-            <div class="card">
-                <div class="icon-box" style="color: #f59e0b;">🛡️</div>
-                <h3>Privacy First</h3>
-                <p>All processing happens locally. You maintain full control over your data and API keys.</p>
-            </div>
-            <div class="card">
-                <div class="icon-box" style="color: #6366f1;">🆓</div>
-                <h3>Hybrid Model</h3>
-                <p>OpenCode's built-in free models continue to work normally. Get the best of both worlds seamlessly.
-                </p>
-            </div>
-        </div>
-    </section>
+        </section>
+    </main>
 
     <footer>
-        <div class="footer-content">
-            <div class="footer-logo">OpenCode + Antigravity</div>
-            <div class="footer-links">
-                <a href="https://github.com/ai-dev-2024/opencode-antigravity">GitHub Repository</a>
-                <a href="https://ko-fi.com/ai_dev_2024">Support on Ko-Fi</a>
-                <a href="#features">Features</a>
-                <a href="https://antigravity.tools">Antigravity Tools</a>
-            </div>
-            <p style="color: var(--text-muted); font-size: 0.9rem;">
-                © 2026 OpenCode + Antigravity Integration. Community Project.
-            </p>
+        <div class="footer-links">
+            <a href="https://github.com/ai-dev-2024/opencode-antigravity">GitHub Repository</a>
+            <a href="https://ko-fi.com/ai_dev_2024">Ko-Fi</a>
+            <a href="#features">Features</a>
         </div>
+        <p class="copyright">© 2026 OpenCode + Antigravity Integration. Community Project.</p>
     </footer>
 </body>
 
