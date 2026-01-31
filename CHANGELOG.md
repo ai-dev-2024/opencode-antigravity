@@ -5,6 +5,23 @@ All notable changes to the OpenCode + Antigravity Integration project will be do
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.0] - 2026-01-31
+
+### Added
+- **Clipboard Image Paste**: Cross-platform support for pasting images directly via Ctrl+V.
+  - Windows: PowerShell-based clipboard access
+  - macOS: osascript-based clipboard access
+  - Linux: wl-paste (Wayland) and xclip (X11) support
+- **Vercel Landing Page**: Beautiful, responsive website at [opencode-antigravity.vercel.app](https://opencode-antigravity.vercel.app)
+- **Enhanced Installation Script**: Now verifies clipboard support and displays feature summary.
+- **Experimental Configuration**: Added `enableClipboardImages` option in config.
+- **Ko-Fi Support**: Added donation link for community support.
+
+### Improved
+- Enhanced documentation with platform support matrix.
+- Added troubleshooting guide for common issues.
+- Updated README with one-click installation instructions.
+
 ## [1.0.0] - 2026-01-25
 
 ### Added

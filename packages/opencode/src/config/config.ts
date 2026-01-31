@@ -203,11 +203,11 @@ export namespace Config {
       {
         cwd: dir,
       },
-    ).catch(() => {})
+    ).catch(() => { })
 
     // Install any additional dependencies defined in the package.json
     // This allows local plugins and custom tools to use external packages
-    await BunProc.run(["install"], { cwd: dir }).catch(() => {})
+    await BunProc.run(["install"], { cwd: dir }).catch(() => { })
   }
 
   function rel(item: string, patterns: string[]) {
@@ -1070,6 +1070,11 @@ export namespace Config {
             .positive()
             .optional()
             .describe("Timeout in milliseconds for model context protocol (MCP) requests"),
+          enableClipboardImages: z
+            .boolean()
+            .optional()
+            .default(true)
+            .describe("Enable clipboard image paste via Ctrl-V (default: true)"),
         })
         .optional(),
     })
@@ -1101,7 +1106,7 @@ export namespace Config {
         await Bun.write(path.join(Global.Path.config, "config.json"), JSON.stringify(result, null, 2))
         await fs.unlink(path.join(Global.Path.config, "config"))
       })
-      .catch(() => {})
+      .catch(() => { })
 
     return result
   })
@@ -1188,7 +1193,7 @@ export namespace Config {
     if (parsed.success) {
       if (!parsed.data.$schema) {
         parsed.data.$schema = "https://opencode.ai/config.json"
-        await Bun.write(configFilepath, JSON.stringify(parsed.data, null, 2)).catch(() => {})
+        await Bun.write(configFilepath, JSON.stringify(parsed.data, null, 2)).catch(() => { })
       }
       const data = parsed.data
       if (data.plugin) {
@@ -1196,7 +1201,7 @@ export namespace Config {
           const plugin = data.plugin[i]
           try {
             data.plugin[i] = import.meta.resolve!(plugin, configFilepath)
-          } catch (err) {}
+          } catch (err) { }
         }
       }
       return data

@@ -4,7 +4,7 @@ import { type FetchFunction, withoutTrailingSlash, withUserAgentSuffix } from "@
 import { OpenAIResponsesLanguageModel } from "./responses/openai-responses-language-model"
 
 // Import the version or define it
-const VERSION = "0.1.0"
+const VERSION = "1.1.25"
 
 export type OpenaiCompatibleModelId = string
 
