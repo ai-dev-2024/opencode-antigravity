@@ -1,17 +1,17 @@
 # Latest Compatible Versions
 
-> Last checked: 2026-02-14 06:33 UTC
+> Last checked: 2026-02-15 06:39 UTC
 
 | Project | Latest Version | Download |
 |---------|----------------|----------|
-| **OpenCode CLI/Desktop** | v1.2.0 | [Download](https://github.com/anomalyco/opencode/releases/latest) |
-| **Antigravity Manager** | v4.1.17 | [Download](https://github.com/lbjlaq/Antigravity-Manager/releases/latest) |
+| **OpenCode CLI/Desktop** | v1.2.4 | [Download](https://github.com/anomalyco/opencode/releases/latest) |
+| **Antigravity Manager** | v4.1.19 | [Download](https://github.com/lbjlaq/Antigravity-Manager/releases/latest) |
 
 ## Compatibility
 
 This integration is tested with:
-- OpenCode: v1.2.0
-- Antigravity Manager: v4.1.17
+- OpenCode: v1.2.4
+- Antigravity Manager: v4.1.19
 
 ## Auto-Update
 
