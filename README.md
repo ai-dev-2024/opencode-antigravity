@@ -14,6 +14,7 @@
 [![Version](https://img.shields.io/badge/Version-1.2.0-1a1614?style=flat-square)](CHANGELOG.md)
 [![License](https://img.shields.io/badge/License-MIT-1a1614?style=flat-square)](LICENSE)
 [![GitHub Stars](https://img.shields.io/github/stars/ai-dev-2024/opencode-antigravity?style=flat-square&color=e8d5b7)](https://github.com/ai-dev-2024/opencode-antigravity)
+[![ZAI Community](https://img.shields.io/badge/Part%20of-ZAI%20Start--up%20Community-8b5cf6?style=flat-square)](https://startup.z.ai/)
 
 </div>
 
