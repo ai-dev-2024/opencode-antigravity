@@ -1,6 +1,6 @@
 # Latest Compatible Versions
 
-> Last checked: 2026-05-25 09:47 UTC
+> Last checked: 2026-05-26 09:34 UTC
 
 | Project | Latest Version | Download |
 |---------|----------------|----------|
